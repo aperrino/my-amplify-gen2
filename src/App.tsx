@@ -27,7 +27,7 @@ export default function App() {
         <div>
           <Routes>
             <Route index path="/" element={<HomePage />} />
-            <Route path="/profile" element={<ProfilePage user="test" />} />
+            <Route path="/profile" element={<ProfilePage user="1" />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </div>

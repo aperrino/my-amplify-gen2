@@ -9,6 +9,7 @@ import {
 
 // api
 import { useAsyncData } from '../components/DataProvider';
+// import { DataProvider } from "../components/DataProvider";
 import { generateClient } from 'aws-amplify/data';
 import { Client } from 'aws-amplify/data';
 import { Schema } from '../../amplify/data/resource';
@@ -30,7 +31,7 @@ interface ProfileProps {
 const client: Client<Schema> = generateClient();
 
 // component
-//import { Rewards } from "./Rewards";
+import { Rewards } from "../components/Rewards";
 
 export const ProfilePage: React.FC<ProfileProps> = (props) => {
   const [profile, setProfile, loading] = useAsyncData(() => new DataProvider().fetchData(props.user));
@@ -65,7 +66,7 @@ export const ProfilePage: React.FC<ProfileProps> = (props) => {
               </Box>
             </Grid>
           </Container>
-          {/* <Rewards userId={props.user} /> */}
+          <Rewards userId={props.user} />
         </SpaceBetween>
         }  
       />

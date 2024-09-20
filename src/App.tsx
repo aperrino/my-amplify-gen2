@@ -5,7 +5,7 @@ import GlobalHeader from "./components/global-header.tsx";
 import HomePage from "./pages/home.tsx";
 import "./styles/app.scss";
 import NotFound from "./pages/not-found.tsx";
-import { ProfilePage } from './pages/profile.tsx';
+import  ProfilePage  from './pages/profile.tsx';
 
 import { Authenticator } from "@aws-amplify/ui-react";
 import { Amplify } from 'aws-amplify';
@@ -27,7 +27,7 @@ export default function App() {
         <div>
           <Routes>
             <Route index path="/" element={<HomePage />} />
-            <Route path="/profile" element={<ProfilePage user="test" />} />
+            <Route path="/profile" element={<ProfilePage user="reinvent" />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </div>

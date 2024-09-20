@@ -73,7 +73,7 @@ const client = generateClient<Schema>();
         >
           <SpaceBetween size="m">
             <b>No resources</b>
-            {/* <Button onClick={createRewards}>Create resource</Button> */}
+            <Button onClick={createRewards}>Create resource</Button>
           </SpaceBetween>
         </Box>
       }

@@ -56,8 +56,8 @@ export default function ProfilePage(props) {
                 <li key={profile.id}> {profile.id} </li>
               ))}
               </ul> */}
-              <img src={ peccy } alt={ singleprofiles.id } width="100px" id="avatar" /><br/>
-              <b>User:</b> { singleprofiles.id }<br/>
+              <img src={ peccy } alt={ props.user } width="100px" id="avatar" /><br/>
+              <b>User:</b> { props.user }<br/>
               <b>Points:</b> { profiles && profiles.length > 0 ? profiles[0]['point'] : "0" }
             </Box>
           </Grid>

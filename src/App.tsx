@@ -6,6 +6,11 @@ import HomePage from "./pages/home.tsx";
 import "./styles/app.scss";
 import NotFound from "./pages/not-found.tsx";
 import  ProfilePage  from './pages/profile.tsx';
+import Catalog1 from "./pages/catalog1.tsx";
+import Catalog2 from "./pages/catalog2.tsx";
+import Catalog3 from "./pages/catalog3.tsx";
+
+
 
 import { Authenticator } from "@aws-amplify/ui-react";
 import { Amplify } from 'aws-amplify';
@@ -29,6 +34,9 @@ export default function App() {
             <Route index path="/" element={<HomePage />} />
             <Route path="/profile" element={<ProfilePage user="reinvent" />} />
             <Route path="*" element={<NotFound />} />
+            <Route path="/catalog1" element={<Catalog1 />} />
+            <Route path="/catalog2" element={<Catalog2 />} />
+            <Route path="/catalog3" element={<Catalog3 />} />
           </Routes>
         </div>
       </Router>

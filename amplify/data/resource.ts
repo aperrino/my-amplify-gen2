@@ -19,6 +19,13 @@ const schema = a.schema({
       name: a.string(),
       organization: a.string(),
     })
+    .authorization((allow) => [allow.owner()]),
+  Reward: a.model({
+      id: a.string().required(),
+      point: a.integer(),
+      userId: a.string(),
+      classId: a.string(),
+    })
     .authorization((allow) => [allow.owner()])
     });
 

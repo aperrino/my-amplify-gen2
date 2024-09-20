@@ -8,7 +8,7 @@ import {
 } from "@cloudscape-design/components";
 
 // component
-// import { Rewards } from "../components/Rewards";
+import { Rewards } from "../components/Rewards.tsx";
 
 // api
 // import { useAsyncData } from '../components/DataProvider';
@@ -19,17 +19,30 @@ import BaseAppLayout from "../components/base-app-layout";
 
 const client = generateClient<Schema>();
 
-export default function ProfilePage() {
-  const [profiles, setProfile] = useState<Schema["Profile"]["type"][]>([]);
+export default function ProfilePage(props) {
+  const [profiles, setProfile] = useState<Array<Schema["Profile"]["type"]>>([]);
+  const [singleprofiles, setSingleProfile] = useState<Schema["Profile"]["type"]>("");
 
   const fetchProfile = async () => {
     const {data: items, errors } = await client.models.Profile.list();
     setProfile(items);
   };
 
+  const fetchAProfile = async () => {
+    const { data: items, errors } = await client.models.Profile.get({
+      id: props.user
+    });
+    setSingleProfile(items);
+  }
+
   useEffect(() => {
     fetchProfile();
+    fetchAProfile();
   }, []);
+
+  function createProfile() {
+    client.models.Profile.create({ id: window.prompt("Add Profile content") });
+}
 
   return (
     <BaseAppLayout
@@ -38,18 +51,19 @@ export default function ProfilePage() {
         <Container header={<Header variant="h2">Profile</Header>}>
           <Grid gridDefinition={[{ colspan: 4 }, { colspan: 8 }]}>
             <Box>
-              <ul>
-              {profiles.map(( {id, name }) => (
-                <li key={id}> {name} </li>
+              {/* <ul>
+              {profiles.map(( profile) => (
+                <li key={profile.id}> {profile.id} </li>
               ))}
-              </ul>
-              {/* <img src={ peccy } alt={ props.user } width="100px" id="avatar" /><br/>
-              <b>User:</b> { props.user }<br/>
-              <b>Points:</b> { profile && profile.length > 0 && !loading ? profile[0]['point'] : "0" } */}
+              </ul> */}
+              <img src={ peccy } alt={ singleprofiles.id } width="100px" id="avatar" /><br/>
+              <b>User:</b> { singleprofiles.id }<br/>
+              <b>Points:</b> { profiles && profiles.length > 0 ? profiles[0]['point'] : "0" }
             </Box>
           </Grid>
         </Container>
-        {/* <Rewards userId={props.user} /> */}
+        <Rewards userId={props.user} />
+        <button onClick={createProfile}>+ new</button>
       </SpaceBetween>
       }  
     />

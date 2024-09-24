@@ -6,9 +6,7 @@ import HomePage from "./pages/home.tsx";
 import "./styles/app.scss";
 import NotFound from "./pages/not-found.tsx";
 import  ProfilePage  from './pages/profile.tsx';
-import Catalog1 from "./pages/catalog1.tsx";
-import Catalog2 from "./pages/catalog2.tsx";
-import Catalog3 from "./pages/catalog3.tsx";
+import Catalog from "./pages/catalog.tsx";
 
 
 
@@ -24,7 +22,7 @@ export default function App() {
 
   return (
     <Authenticator>
-      {({ signOut }) => (
+      {({ signOut , user}) => (
     <div style={{ height: "100%" }}>
       <Router>
         <GlobalHeader />
@@ -32,11 +30,9 @@ export default function App() {
         <div>
           <Routes>
             <Route index path="/" element={<HomePage />} />
-            <Route path="/profile" element={<ProfilePage user="reinvent" />} />
+            <Route path="/profile" element={<ProfilePage user={user?.username} />} />
             <Route path="*" element={<NotFound />} />
-            <Route path="/catalog1" element={<Catalog1 />} />
-            <Route path="/catalog2" element={<Catalog2 />} />
-            <Route path="/catalog3" element={<Catalog3 />} />
+            <Route path="/catalog" element={<Catalog />} />
           </Routes>
         </div>
       </Router>

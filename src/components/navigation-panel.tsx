@@ -30,13 +30,11 @@ export default function NavigationPanel() {
       //     { type: "link", text: "Item 2", href: "/section/item3" },
       //   ],
       // }
-      { type: "link", text: "catalog", href: "/" },
+      { type: "link", text: "test", href: "/" },
       { type: "link", text: "community", href: "/page2" },
       { type: "link", text: "profile", href: "/profile" },
       { type: "link", text: "admin", href: "/page4" },
-      { type: "link", text: "catalog1", href: "/catalog1" },
-      { type: "link", text: "catalog2", href: "/catalog2" },
-      { type: "link", text: "catalog3", href: "/catalog3" }
+      { type: "link", text: "catalog", href: "/catalog" }
     ];
 
     items.push(

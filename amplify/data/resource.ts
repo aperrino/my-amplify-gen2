@@ -40,6 +40,13 @@ const schema = a.schema({
       classes: a.hasMany('Class', 'courseId'),
     })
     .authorization(allow => [allow.authenticated()]),
+  Comment: a.model({
+      id: a.id().required(),
+      classId: a.string(),
+      content: a.string(),
+      commentVersion: a.string(),
+    })
+    .authorization(allow => [allow.authenticated()]),
     });
 export type Schema = ClientSchema<typeof schema>;
 export const data = defineData({

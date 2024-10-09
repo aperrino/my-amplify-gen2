@@ -77,18 +77,35 @@ export function Player(props) {
     </Container>
   );
 }
-
 async function updateTrackApi(user, classId, uid, played, complete = false) {
-  
-  const rewardData = {
-    id: uid,
-    point: 10,
-    userId: user,
-    classId: classId
-  };
+  try {
+    const { data: existingRewards } = await client.models.Reward.list({
+      filter: { userId: { eq: user }, classId: { eq: classId } }
+    });
 
-  await client.models.Reward.update(rewardData);
+    if (existingRewards && existingRewards.length > 0) {
+      const existingReward = existingRewards[0];
+      const updatedReward = {
+        id: existingReward.id,
+        point: existingReward.point + 10,
+        _version: existingReward._version
+      };
 
-  // TODO
+      console.log(updatedReward);
+      await client.models.Reward.update(updatedReward);
+    } else {
+      const newReward = {
+        userId: user,
+        classId: classId,
+        point: 10
+      };
+      console.log(newReward);
+      await client.models.Reward.create(newReward);
+    }
 
+    console.log('Reward updated/created successfully');
+
+  } catch (error) {
+    console.error('Error updating/creating reward:', error);
+  }
 }

@@ -3,6 +3,7 @@ import {
     Box, Header, SpaceBetween,
     Pagination, Table, Button,
   } from "@cloudscape-design/components";
+  import { useCollection } from '@cloudscape-design/collection-hooks';
 
 import React, { useEffect, useState } from "react";
 
@@ -17,10 +18,31 @@ export const getHeaderCounterText = (
   return `(${items.length})`;
 };
 
+const TableEmptyState = () => {
+  return (
+    <SpaceBetween size="l">
+      <Box
+        margin={{ vertical: 'xs' }}
+        fontSize="heading-s"
+        textAlign="center"
+        color="inherit"
+      >
+        No Contents
+      </Box>
+    </SpaceBetween>
+  );
+}
+
 const client = generateClient<Schema>();
 
   function Rewards(user) {
     const [rewards, setRewards] = useState<Array<Schema["Reward"]["type"]>>([]);
+    const { items, collectionProps, paginationProps } = useCollection(rewards, {
+      filtering: {
+        empty: <TableEmptyState resourceName="Reward" />,
+      },
+      pagination: { pageSize: 5 },
+    });
 
     const fetchRewards = async () => {
       const {data: points, errors } = await client.models.Reward.list();
@@ -37,6 +59,7 @@ const client = generateClient<Schema>();
   
     return (
       <Table
+      {...collectionProps}
       renderAriaLive={({
         firstIndex,
         lastIndex,
@@ -78,6 +101,7 @@ const client = generateClient<Schema>();
         </Box>
       }
       header={<Header counter={getHeaderCounterText(rewards)}> Rewards </Header>}
+      pagination={<Pagination {...paginationProps} />}
     />
     );
   }

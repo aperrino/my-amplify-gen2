@@ -1,6 +1,6 @@
 #!/bin/bash
 # Get the region information
-export AWS_REGION=$(aws configure get region)
+# export AWS_REGION=$(aws configure get region)
 
 tables=$(aws dynamodb list-tables --output text --region $AWS_REGION)
 

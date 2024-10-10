@@ -1,5 +1,5 @@
 {
-    "Course-7445a6ztsfdylpiczrn5hdh3ry-NONE-7445a6ztsfdylpiczrn5hdh3ry-NONE": [
+    "Course": [
         {"PutRequest": 
             {"Item":{"id":{"S":"1"},"name":{"S":"Container"},"createdAt":{"S":"2024-09-23T06:13:43Z"}, "updatedAt":{"S":"2024-09-23T06:13:43Z"}}}
         },

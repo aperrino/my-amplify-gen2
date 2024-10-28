@@ -47,7 +47,22 @@ const schema = a.schema({
       commentVersion: a.string(),
     })
     .authorization(allow => [allow.authenticated()]),
-    });
+
+    BedrockResponse: a.customType({
+      body: a.string(),
+      error: a.string(),
+    }),
+  
+    askBedrock: a
+      .query()
+      .arguments({ prompt: a.string() })
+      .returns(a.ref("BedrockResponse"))
+      .authorization(allow => allow.authenticated())
+      .handler(
+          a.handler.custom({ entry: "./bedrock.js", dataSource: "bedrockDS" })
+    ),
+
+});
 export type Schema = ClientSchema<typeof schema>;
 export const data = defineData({
   schema,

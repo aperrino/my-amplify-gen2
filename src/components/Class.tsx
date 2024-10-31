@@ -1,11 +1,12 @@
 import React from "react";
 import {
-  SpaceBetween, ExpandableSection
+   SpaceBetween, ExpandableSection
 } from "@cloudscape-design/components";
 
 import { Player } from './Player'
 import { Comments } from './Comments'
-
+import { Bot } from './Bot'
+ 
 const Class = ({
   activeClass,
   name,
@@ -19,6 +20,8 @@ const Class = ({
     <>
       <SpaceBetween size="l">
         <Player classId={activeClass.id} title={activeClass.name} desc={activeClass.description} author={activeClass.author} url={activeClass.url} user={userName} uid={userId} />
+        
+        <Bot transcript={activeClass.transcript}></Bot>
         
         <ExpandableSection headerText="Video transcript" variant="container">
           {(() => {

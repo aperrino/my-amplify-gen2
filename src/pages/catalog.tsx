@@ -42,7 +42,7 @@ export default function Catalog(props) {
       content={
         <SpaceBetween size="s">
           <Container>
-            <Grid gridDefinition={[{ colspan: 3 }, { colspan: 9 }]}>
+            <Grid gridDefinition={[{ colspan: 2 }, { colspan: 10 }]}>
               <Container>
                 {
                   courses.map(course =>

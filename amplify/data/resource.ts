@@ -29,6 +29,7 @@ const schema = a.schema({
       class_flag: a.integer(),
       courseId: a.id(),
       url: a.string(),
+      transcript: a.string(),
       comments: a.string(),
       author: a.string(),
       course: a.belongsTo('Course', 'courseId'),

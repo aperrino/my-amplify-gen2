@@ -87,6 +87,8 @@ const ClassCatalog = ({
         </Box>
       }
       header={activeCourse && activeCourse != null ? (<Header>{activeCourse.title}</Header>) : (<div />)}
+      
+      // TODO: Fix pagination
       pagination={
         <Pagination currentPageIndex={1} pagesCount={2} />
       }

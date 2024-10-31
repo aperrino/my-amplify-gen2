@@ -8,9 +8,9 @@ const Course = ({
   setActiveCourse,
   setActiveClass,
 }) => {
-  if (!activeCourse) {
-    setActiveCourse({ id: course.id, title: course.name });
-  }
+  // if (!activeCourse) {
+  //   setActiveCourse({ id: course.id, title: course.name });
+  // }
 
   const switchCourseHandler = () => {
     setActiveCourse({ id: course.id, title: course.name });

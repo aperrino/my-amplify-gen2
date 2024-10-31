@@ -66,7 +66,9 @@ export function Player(props) {
           <Box key="title" variant="h2">{props.title}</Box>
           <Box key="author" variant="small">{props.author}</Box>
         </SpaceBetween>
-        {props.desc}
+
+        <div key="description">{props.desc}</div>
+
         <Survey 
           key="survey"
           classTitle={props.title} 

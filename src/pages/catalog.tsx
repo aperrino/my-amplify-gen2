@@ -20,13 +20,17 @@ import BaseAppLayout from "../components/base-app-layout";
 const client = generateClient<Schema>();
 
 export default function Catalog(props) {
-  const [activeClass, setActiveClass] = useState<Array<Schema["Course"]["type"]>>([]);
-  const [activeCourse, setActiveCourse] = useState<Array<Schema["Class"]["type"]>>([]);
+  const [activeClass, setActiveClass] = useState<Schema["Class"]["type"]>();
+  const [activeCourse, setActiveCourse] = useState<Schema["Course"]["type"]>();
   const [courses, setCourses] = useState<Array<Schema["Course"]["type"]>>([]);
   
   const fetchCourse = async () => {
     const {data: items, errors } = await client.models.Course.list();
     setCourses(items);
+    if (!activeCourse) {
+      const course = items[0];
+      setActiveCourse(course);
+    }
   };
 
   useEffect(() => {

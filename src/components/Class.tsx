@@ -1,5 +1,6 @@
+import React from "react";
 import {
-  SpaceBetween
+  SpaceBetween, ExpandableSection
 } from "@cloudscape-design/components";
 
 import { Player } from './Player'
@@ -18,6 +19,19 @@ const Class = ({
     <>
       <SpaceBetween size="l">
         <Player classId={activeClass.id} title={activeClass.name} desc={activeClass.description} author={activeClass.author} url={activeClass.url} user={userName} uid={userId} />
+        
+        <ExpandableSection headerText="Video transcript" variant="container">
+          {(() => {
+            const lines = activeClass.transcript.split('\n');
+            return lines.map((line: string, i: number) => (
+              <React.Fragment key={i}>
+                {line}
+                {i !== lines.length - 1 && <br />}
+              </React.Fragment>
+            ));
+          })()}
+        </ExpandableSection>
+
         <Comments classId={activeClass.id} />
       </SpaceBetween>
     </>

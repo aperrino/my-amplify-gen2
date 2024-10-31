@@ -262,9 +262,10 @@ function Comments({ classId }) {
       content: post,
       commentVersion: "1",
     });
-    console.log(newComment);
-    await fetchComments();
-  }, [fetchComments]);
+    if (!errors && newComment) {
+      setComments(prevComments => [...prevComments, newComment]);
+    }
+  }, []);
 
   const editCommentApi = useCallback(async (commentId, commentVersion, post) => {
     const updatedPost = {

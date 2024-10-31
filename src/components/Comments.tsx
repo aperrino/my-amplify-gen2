@@ -1,4 +1,4 @@
-import { useEffect, useState, useCallback } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import {
   Box,
   Button,
@@ -20,9 +20,13 @@ import moment from 'moment';
 const client = generateClient<Schema>();
 
 function NewLineToBr({ children = "" }) {
-  return children.split('\n').reduce((arr, line) => arr.concat(line, <br />), []);
+  return children.split('\n').map((line, index) => (
+    <React.Fragment key={index}>
+      {line}
+      {index !== children.split('\n').length - 1 && <br />}
+    </React.Fragment>
+  ));
 }
-
 const NoComment = () => (
   <Box
     padding={{ bottom: "s" }}
@@ -138,27 +142,51 @@ const CommentForm = ({
     return content || null;
   };
 
-  const generateSummarization = async (e: any) =>{
-    console.log("test success");
-    const comments = "긍정적 코멘트 : AWS Lambda와 ECS의 차이점을 드디어 제대로 이해했네요! 실제 사례를 들어가며 설명해주셔서 너무 좋았습니다. 특히 서버리스 아키텍처 부분은 정말 유용했어요."
-"처음으로 AWS 자격증 공부를 시작하는데, 기초부터 차근차근 설명해주셔서 감사합니다. 클라우드 개념이 훨씬 명확해졌어요!"
-"실무에서 바로 적용할 수 있는 내용이라 더욱 좋네요. 특히 비용 최적화 팁들은 우리 회사에서도 당장 적용해볼 수 있을 것 같아요."
-"건설적 피드백"
-"전반적으로 좋은 내용이었는데, 다음에는 실제 콘솔 화면도 같이 보여주시면 더 이해하기 쉬울 것 같아요."
-"고급 내용도 좋지만, 기본적인 네트워크 설정 부분도 다뤄주시면 감사하겠습니다. VPC 구성이 아직 어려워요."
-"질문성 코멘트"
-"Auto Scaling 설정할 때 Target Tracking 정책과 Step Scaling 정책 중 어떤 것을 더 추천하시나요? 실제 프로덕션 환경에서는 어떤 게 더 안정적인가요?"
-"다중 리전 구성시 데이터 동기화는 어떻게 하시나요? DynamoDB Global Table을 쓰시나요, 아니면 다른 방법이 있나요?"
-"응원 코멘트"
-"매번 퀄리티 높은 컨텐츠 감사합니다! 덕분에 SA Pro 자격증 준비가 훨씬 수월해졌어요 👍"
-"실무자의 관점에서 설명해주시니 훨씬 와닿네요. 다음 영상도 기대하겠습니다!";
-    const prompt = `Can you summarize below comments? use below ${comments}, 5점 만점에 점수도 보여주세요. 근거도 알려주세요.`;
-    const response = await askBedrock(prompt);
-    console.log(response);
-    const generatedSummary = "This is the generated summary based on the input.";
-    setSummary(response);
-  };
+  const generateSummarization = async (e: any) => {
+    console.log("Generating summarization...");
+    
+    try {
+      const { data: commentItems, errors } = await client.models.Comment.list({
+        filter: { classId: { eq: classId } }
+      });
+  
+      if (errors) {
+        console.error('Error fetching comments:', errors);
+        return;
+      }
+  
+      if (!commentItems || commentItems.length === 0) {
+        console.log("No comments to summarize");
+        setSummary("No comments available to summarize.");
+        return;
+      }
+  
+      const commentsText = commentItems
+        .map(comment => comment.content)
+        .join("\n");
+  
+      const prompt = `Summarize the following comments in a structured format:
 
+      ${commentsText}
+      
+      Format your response as follows:
+      Summary: [Provide a concise summary of the overall sentiment and main points from the comments]
+      
+      Overall Score: [Give a single score out of 5 for all comments combined]
+      
+      Main Reason: [Provide one primary reason for the given score]`;
+  
+      const response = await askBedrock(prompt);
+      console.log("Bedrock response:", response);
+  
+      setSummary(response);
+  
+    } catch (error) {
+      console.error("Error in generateSummarization:", error);
+      setSummary("An error occurred while generating the summary.");
+    }
+  };
+  
   return (
     <form onSubmit={submitHandler}>
       <Form>
@@ -180,12 +208,21 @@ const CommentForm = ({
             <Button formAction="none" onClick={generateSummarization}>Summarize</Button>
         </Box>
         <Box padding={{ top: "s" }}>
-          <Textarea 
-            placeholder="Generated summary will appear here." 
-            value={summary} 
-            readOnly
-            rows={summary.split('\n').length || 1}
-          />
+          <Box
+            as="pre"
+            padding="s"
+            fontSize="body-m"
+            color="text-body-secondary"
+            backgroundColor="background-container"
+            borderRadius="s"
+            style={{
+              whiteSpace: 'pre-wrap',
+              wordWrap: 'break-word',
+              overflowWrap: 'break-word'
+            }}
+          >
+            <NewLineToBr>{summary || "Generated summary will appear here."}</NewLineToBr>
+          </Box>
         </Box>
         <Modal
           onDismiss={() => setAlertVisible(false)}

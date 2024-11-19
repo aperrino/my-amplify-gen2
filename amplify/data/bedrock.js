@@ -16,7 +16,7 @@ export function request(ctx) {
               content: [
                 {
                   type: "text",
-                  text: `\n\nHuman:${prompt}\n\nAssistant:`,
+                  text: prompt,
                 },
               ],
             },

@@ -44,39 +44,50 @@ export function Bot(props: any) {
   </transcript>
   `;
 
-
-
-  const converseBedrock = async (newChats: any[]) => {
-    const messages = newChats.map(chat => {
-      return {
-        role: chat.role,
-        content: [
-          { text: chat.text }
-        ]
-      }
-    })
+  // call converseBedrock function defined in Amplify resource backend
+  const sendMessage = async (messages: any[]) => {
     const response = await client.queries.converseBedrock({ 
       system: JSON.stringify([{ text: systemPrompt }]),
       messages: JSON.stringify( messages ) 
     });
+
     const res = JSON.parse(response.data?.body!);
     const outputMessage = res.output.message;
-    const outputChat = outputMessage.content.map((item: { role: string, text: string; }) => ({
-      role: outputMessage.role,
-      text: item.text
-    }));
 
-    return outputChat;
+    return outputMessage;
   };
 
+  // handle new message sent from the chat input
   const handleSend = async () => {
     if (value.trim() !== "") {
+      // merge previous chat history with newest message sent by user
       const newChats = [...chats, { role: "user", text: value.trim() }];
+
+      // update frontend component
       setChats(newChats);
       setValue("");
       setIsDisabled(true);
 
-      const outputChat = await converseBedrock(newChats);
+      // convert each chat message to `role + content` pair as required by Anthropic Claude Message API
+      const messages = newChats.map(chat => {
+        return {
+          role: chat.role,
+          content: [
+            { text: chat.text }
+          ]
+        }
+      });
+
+      // send chat to Bedrock
+      const outputMessage = await sendMessage(messages);
+
+      // convert back the output of backend call to format that can be consumed by frontend component
+      const outputChat = outputMessage.content.map((item: { role: string, text: string; }) => ({
+        role: outputMessage.role,
+        text: item.text
+      }));
+
+      // merge the latest response received from Bedrock with existing chats to update frontend component
       setChats([...newChats, ...outputChat]);
       setIsDisabled(false);
     }

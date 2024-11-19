@@ -1,32 +1,28 @@
 export function request(ctx) {
-    const system = JSON.parse(ctx.args.system) || [];
-    const messages = JSON.parse(ctx.args.messages) || [];
-  
-    const body = {
-      inferenceConfig: {
-        maxTokens: 4096,
-        temperature: 0.5
+  const system = JSON.parse(ctx.args.system) || [{ text: "You are a friendly AI assistant" }];
+  const messages = JSON.parse(ctx.args.messages) || [];
+
+  return {
+    resourcePath: `/model/anthropic.claude-3-sonnet-20240229-v1:0/converse`,
+    method: "POST",
+    params: {
+      headers: {
+        "Content-Type": "application/json",
       },
-      messages
-    };
-    if (system.length > 0) {
-      body.system = system;
-    }
-  
-    return {
-      resourcePath: `/model/anthropic.claude-3-sonnet-20240229-v1:0/converse`,
-      method: "POST",
-      params: {
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body
+      body: {
+        system,
+        messages,
+        inferenceConfig: {
+          maxTokens: 4096,
+          temperature: 0.5
+        }
       },
-    };
-  }
-  
-  export function response(ctx) {
-    return {
-      body: ctx.result.body,
-    };
-  }
+    },
+  };
+}
+
+export function response(ctx) {
+  return {
+    body: ctx.result.body,
+  };
+}

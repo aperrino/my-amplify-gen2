@@ -5,42 +5,78 @@ import {
   ContentLayout,
   Header,
   SpaceBetween,
+  Box,
+  Button
 } from "@cloudscape-design/components";
 import { useOnFollow } from "../common/hooks/use-on-follow";
 import { APP_NAME } from "../common/constants";
 import BaseAppLayout from "../components/base-app-layout";
+import { useNavigate } from 'react-router-dom';
+
+interface BreadcrumbItem {
+  text: string;
+  href: string;
+}
+
+const NOT_FOUND_BREADCRUMBS: BreadcrumbItem[] = [
+  {
+    text: APP_NAME,
+    href: "/",
+  },
+  {
+    text: "Not Found",
+    href: "/not-found",
+  },
+];
 
 export default function NotFound() {
   const onFollow = useOnFollow();
+  const navigate = useNavigate();
+
+  const handleGoHome = () => {
+    navigate('/');
+  };
 
   return (
     <BaseAppLayout
       breadcrumbs={
         <BreadcrumbGroup
           onFollow={onFollow}
-          items={[
-            {
-              text: APP_NAME,
-              href: "/",
-            },
-            {
-              text: "Not Found",
-              href: "/not-found",
-            },
-          ]}
+          items={NOT_FOUND_BREADCRUMBS}
           expandAriaLabel="Show path"
           ariaLabel="Breadcrumbs"
         />
       }
       content={
         <ContentLayout
-          header={<Header variant="h1">404. Page Not Found</Header>}
+          header={
+            <Header 
+              variant="h1"
+              description="The page you are looking for could not be found."
+            >
+              404 - Page Not Found
+            </Header>
+          }
         >
           <SpaceBetween size="l">
             <Container>
-              <Alert type="error" header="404. Page Not Found">
-                The page you are looking for does not exist.
-              </Alert>
+              <Box margin={{ bottom: 'l' }}>
+                <Alert
+                  type="error"
+                  header="Page Not Found"
+                  action={
+                    <Button 
+                      onClick={handleGoHome}
+                      variant="primary"
+                    >
+                      Go to Home
+                    </Button>
+                  }
+                >
+                  We're sorry, but the page you are looking for does not exist.
+                  You might have mistyped the address or the page may have moved.
+                </Alert>
+              </Box>
             </Container>
           </SpaceBetween>
         </ContentLayout>

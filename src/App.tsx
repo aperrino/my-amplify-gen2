@@ -24,13 +24,13 @@ function AuthenticatedApp({ signOut, user }) {
   useEffect(() => {
     const createOrUpdateProfile = async () => {
       try {
-        // 기존 프로필 확인
+        
         const { data: existingProfile } = await client.models.Profile.get({ 
           id: user.username 
         });
 
         if (!existingProfile) {
-          // 새 프로필 생성
+          
           await client.models.Profile.create({
             id: user.username,
             userId: user.username,

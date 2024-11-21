@@ -25,7 +25,7 @@ export default function App() {
       {({ signOut , user}) => (
     <div style={{ height: "100%" }}>
       <Router>
-        <GlobalHeader />
+      <GlobalHeader user={user?.signInDetails?.loginId} signOut={signOut} />
         <div style={{ height: "56px", backgroundColor: "#000716" }}>&nbsp;</div>
         <div>
           <Routes>
@@ -36,7 +36,6 @@ export default function App() {
           </Routes>
         </div>
       </Router>
-      <button onClick={signOut}>Sign out</button>
     </div>
       )}
     </Authenticator>

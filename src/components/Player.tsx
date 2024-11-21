@@ -1,5 +1,4 @@
-// ui
-import React, { useState } from "react";
+import React, { useState, useCallback } from "react";
 import ReactPlayer from 'react-player/lazy';
 import {
   Box, Container, SpaceBetween,
@@ -8,25 +7,92 @@ import '../static/css/Videoplayer.css';
 
 import { generateClient } from 'aws-amplify/data';
 import { Schema } from '../../amplify/data/resource';
-
 import { Survey } from './Survey';
 
 const client = generateClient<Schema>();
 
-export function Player(props) {
+interface PlayerProps {
+  url: string;
+  user: string;
+  classId: string;
+  uid: string;
+  title: string;
+  author: string;
+  desc: string;
+}
+
+interface VideoProgress {
+  playedSeconds: number;
+}
+
+export function Player({ url, user, classId, uid, title, author, desc }: PlayerProps) {
   const [played, setPlayed] = useState(0);
   const [marker, setMarker] = useState(0);
   const [duration, setDuration] = useState(0);
-  const interval = 30;
+  const INTERVAL = 30;
 
-  const [reward, setReward] = useState<Array<Schema["Reward"]["type"]>>([]);
+  const updateReward = useCallback(async (complete = false) => {
+    try {
+      const { data: existingRewards } = await client.models.Reward.list({
+        filter: { userId: { eq: user }, classId: { eq: classId } }
+      });
+
+      if (existingRewards?.length > 0) {
+        const existingReward = existingRewards[0];
+        await client.models.Reward.update({
+          id: existingReward.id,
+          point: existingReward.point + 10,
+          _version: existingReward._version
+        });
+      } else {
+        await client.models.Reward.create({
+          userId: user,
+          classId: classId,
+          point: 10
+        });
+      }
+
+      console.log('Reward updated successfully');
+    } catch (error) {
+      console.error('Error updating reward:', error);
+    }
+  }, [user, classId]);
+
+  const handlePlay = () => {
+    setMarker(played + INTERVAL);
+  };
+
+  const handleEnded = () => {
+    if (Math.round(played) >= Math.floor(duration)) {
+      updateReward(true);
+    }
+  };
+
+  const handleDuration = (duration: number) => {
+    setDuration(Math.floor(duration));
+  };
+
+  const handleProgress = ({ playedSeconds }: VideoProgress) => {
+    if (marker >= duration) {
+      setMarker(0);
+      return;
+    }
+
+    const checkpoint = marker + INTERVAL;
+    setPlayed(playedSeconds);
+
+    if (playedSeconds > checkpoint) {
+      updateReward();
+      setMarker(checkpoint);
+    }
+  };
 
   return (
     <Container>
       <Box>
         <ReactPlayer
           className='react-player'
-          url={props.url}
+          url={url}
           width='100%'
           loop={false}
           playing={true}
@@ -34,80 +100,36 @@ export function Player(props) {
           controls={true}
           light={false}
           pip={false}
-          onPlay={ () => {
-            setMarker(played + interval);
-          }}
-          onEnded={ () => {
-            if (Math.round(played) >= Math.floor(duration)) {
-              updateTrackApi(props.user, props.classId, props.uid, -1, true);
-            }
-          }}
-          onDuration={ (e) => {
-            setDuration(Math.floor(e));
-          }}
-          onProgress={ (e) => {
-            if (marker >= duration) {
-              // reset marker
-              setMarker(0);
-            }
-
-            var checkpoint = marker + interval;
-            setPlayed(e.playedSeconds);
-
-            if (played > checkpoint) {
-              updateTrackApi(props.user, props.classId, props.uid, checkpoint);
-              setMarker(checkpoint);
-            }
-          }}
+          onPlay={handlePlay}
+          onEnded={handleEnded}
+          onDuration={handleDuration}
+          onProgress={handleProgress}
         />
       </Box>
       <SpaceBetween direction="vertical" size="s">
-        <SpaceBetween key="title-author" direction="vertical" size="xxs">
-          <Box key="title" variant="h2">{props.title}</Box>
-          <Box key="author" variant="small">{props.author}</Box>
-        </SpaceBetween>
-
-        <div key="description">{props.desc}</div>
-
+        <VideoInfo title={title} author={author} description={desc} />
         <Survey 
-          key="survey"
-          classTitle={props.title} 
-          classId={props.classId} 
-          userId={props.user} 
+          classTitle={title} 
+          classId={classId} 
+          userId={user} 
         />
       </SpaceBetween>
     </Container>
   );
 }
-async function updateTrackApi(user, classId, uid, played, complete = false) {
-  try {
-    const { data: existingRewards } = await client.models.Reward.list({
-      filter: { userId: { eq: user }, classId: { eq: classId } }
-    });
 
-    if (existingRewards && existingRewards.length > 0) {
-      const existingReward = existingRewards[0];
-      const updatedReward = {
-        id: existingReward.id,
-        point: existingReward.point + 10,
-        _version: existingReward._version
-      };
-
-      console.log(updatedReward);
-      await client.models.Reward.update(updatedReward);
-    } else {
-      const newReward = {
-        userId: user,
-        classId: classId,
-        point: 10
-      };
-      console.log(newReward);
-      await client.models.Reward.create(newReward);
-    }
-
-    console.log('Reward updated/created successfully');
-
-  } catch (error) {
-    console.error('Error updating/creating reward:', error);
-  }
+interface VideoInfoProps {
+  title: string;
+  author: string;
+  description: string;
 }
+
+const VideoInfo = ({ title, author, description }: VideoInfoProps) => (
+  <>
+    <SpaceBetween direction="vertical" size="xxs">
+      <Box variant="h2">{title}</Box>
+      <Box variant="small">{author}</Box>
+    </SpaceBetween>
+    <div>{description}</div>
+  </>
+);

@@ -12,6 +12,7 @@ import {
   Textarea,
   Input
 } from "@cloudscape-design/components";
+import LoadingBar from "@cloudscape-design/chat-components/loading-bar";
 
 import { generateClient } from 'aws-amplify/data';
 import { Schema } from '../../amplify/data/resource';
@@ -27,6 +28,7 @@ function NewLineToBr({ children = "" }) {
     </React.Fragment>
   ));
 }
+
 const NoComment = () => (
   <Box
     padding={{ bottom: "s" }}
@@ -114,7 +116,8 @@ const CommentForm = ({
 }) => {
   const [post, setPost] = useState(initText);
   const [alertVisible, setAlertVisible] = useState(false);
-  const [summary, setSummary] = useState(''); 
+  const [summary, setSummary] = useState('');
+  const [isGenerating, setIsGenerating] = useState(false);
 
   const submitHandler = async (event) => {
     event.preventDefault();
@@ -143,87 +146,131 @@ const CommentForm = ({
   };
 
   const generateSummarization = async (e: any) => {
+    setIsGenerating(true);
     console.log("Generating summarization...");
     
     try {
       const { data: commentItems, errors } = await client.models.Comment.list({
         filter: { classId: { eq: classId } }
       });
-  
+
       if (errors) {
         console.error('Error fetching comments:', errors);
         return;
       }
-  
-      if (!commentItems || commentItems.length === 0) {
+
+      let allComments = [...commentItems];
+      if (post.trim()) {
+        allComments = [...allComments, { content: post }];
+      }
+
+      if (!allComments || allComments.length === 0) {
         console.log("No comments to summarize");
         setSummary("No comments available to summarize.");
         return;
       }
-  
-      const commentsText = commentItems
+
+      const commentsText = allComments
         .map(comment => comment.content)
         .join("\n");
-  
-      const prompt = `Summarize the following comments in a structured format:
 
+      const prompt = `📊 Summarize the following comments in a structured format:
       ${commentsText}
-      
       Format your response as follows:
-      Summary: [Provide a concise summary of the overall sentiment and main points from the comments]
-      
-      Overall Score: [Give a single score out of 5 for all comments combined]
-      
-      Main Reason: [Provide one primary reason for the given score]`;
-  
+      📚 Summary: [Provide a concise summary of the overall sentiment and main points from the comments]
+      ⭐️ Overall Score: [Give a single score out of 5 for all comments combined]
+      💫 Main Reason: [Provide one primary reason for the given score]`;
+
       const response = await askBedrock(prompt);
       console.log("Bedrock response:", response);
-  
       setSummary(response);
-  
+
     } catch (error) {
       console.error("Error in generateSummarization:", error);
       setSummary("An error occurred while generating the summary.");
+    } finally {
+      setIsGenerating(false);
     }
   };
-  
+
   return (
     <form onSubmit={submitHandler}>
       <Form>
-        <Grid disableGutters gridDefinition={[{ colspan: 10 }, { colspan: 2 }]}>
-          <Textarea
-            placeholder="Enter your comments here."
-            onChange={({ detail }) => setPost(detail.value)}
-            value={post}
-            rows={post.split(/\r\n|\r|\n/).length}
-          />
-          <Box float="right">
-            <SpaceBetween direction="horizontal" size="xs">
-              <Button formAction="none" iconName="undo" variant="icon" onClick={cancelHandler} />
-              <Button formAction="submit" iconName="upload" variant="icon" />
-            </SpaceBetween>
+        <SpaceBetween size="m">
+          {/* Summarize Section */}
+          <Box>
+            <Button 
+              formAction="none" 
+              onClick={generateSummarization}
+              iconName="gen-ai"
+              disabled={isGenerating}
+              loading={isGenerating}
+            >
+              Summarize
+            </Button>
           </Box>
-        </Grid>
-        <Box padding={{ top: "s" }}>
-            <Button formAction="none" onClick={generateSummarization}>Summarize</Button>
-        </Box>
-        <Box padding={{ top: "s" }}>
-          <Box
-            as="pre"
-            padding="s"
-            fontSize="body-m"
-            color="text-body-secondary"
-            backgroundColor="background-container"
-            borderRadius="s"
-            style={{
-              whiteSpace: 'pre-wrap',
-              wordWrap: 'break-word',
-              overflowWrap: 'break-word'
-            }}
-          >
-            <NewLineToBr>{summary || "Generated summary will appear here."}</NewLineToBr>
+          
+          {isGenerating && (
+            <Container>
+              <Box
+                margin={{ bottom: "xs", left: "l" }}
+                color="text-body-secondary"
+              >
+                Generating summary
+              </Box>
+              <LoadingBar variant="gen-ai" />
+            </Container>
+          )}
+
+          <Box>
+            <Box
+              as="pre"
+              padding="s"
+              fontSize="body-m"
+              color="text-body-secondary"
+              backgroundColor="background-container"
+              borderRadius="s"
+              style={{
+                whiteSpace: 'pre-wrap',
+                wordWrap: 'break-word',
+                overflowWrap: 'break-word'
+              }}
+            >
+              <NewLineToBr>{summary || "Generated summary will appear here."}</NewLineToBr>
+            </Box>
           </Box>
-        </Box>
+
+          {/* Line */}
+          <hr style={{ width: '100%', margin: '20px 0' }} />
+
+          {/* Comment */}
+          <Grid disableGutters gridDefinition={[{ colspan: 10 }, { colspan: 2 }]}>
+            <Textarea
+              placeholder="Enter your comments here."
+              onChange={({ detail }) => setPost(detail.value)}
+              value={post}
+              rows={post.split(/\r\n|\r|\n/).length}
+            />
+            <Box float="right">
+              <SpaceBetween direction="horizontal" size="xs">
+                <Button 
+                  formAction="none" 
+                  iconName="undo" 
+                  variant="icon" 
+                  onClick={cancelHandler}
+                  disabled={isGenerating}
+                />
+                <Button 
+                  formAction="submit" 
+                  iconName="upload" 
+                  variant="icon"
+                  disabled={isGenerating}
+                />
+              </SpaceBetween>
+            </Box>
+          </Grid>
+        </SpaceBetween>
+
         <Modal
           onDismiss={() => setAlertVisible(false)}
           visible={alertVisible}
@@ -260,7 +307,6 @@ function Comments({ classId }) {
     const { errors, data: newComment } = await client.models.Comment.create({
       classId: classId,
       content: post,
-      commentVersion: "1",
     });
     if (!errors && newComment) {
       setComments(prevComments => [...prevComments, newComment]);
@@ -302,7 +348,7 @@ function Comments({ classId }) {
           <SpaceBetween size="xs">
             {comments.length > 0 ? (
               comments
-                .filter(comment => comment.classId === classId)  // classId로 필터링
+                .filter(comment => comment.classId === classId)
                 .sort((a, b) => b.createdAt.localeCompare(a.updatedAt))
                 .map(comment => (
                   <Comment

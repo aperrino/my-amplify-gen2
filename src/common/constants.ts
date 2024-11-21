@@ -1,2 +1,2 @@
-export const APP_NAME = "Example App";
+export const APP_NAME = "AWS reinvent Builders";
 export const USE_BROWSER_ROUTER = true;

@@ -4,7 +4,7 @@ import { Mode } from "@cloudscape-design/global-styles";
 import { StorageHelper } from "../common/helpers/storage-helper";
 import { APP_NAME } from "../common/constants";
 
-export default function GlobalHeader() {
+export default function GlobalHeader(props) {
   const [theme, setTheme] = useState<Mode>(StorageHelper.getTheme());
 
   const onChangeThemeClick = () => {
@@ -22,14 +22,27 @@ export default function GlobalHeader() {
     >
       <TopNavigation
         identity={{
-          href: "/",
-          logo: { src: "/images/logo.png", alt: `${APP_NAME} Logo` },
+          title: `${APP_NAME}`,
         }}
         utilities={[
           {
             type: "button",
             text: theme === Mode.Dark ? "Light Mode" : "Dark Mode",
             onClick: onChangeThemeClick,
+          },
+          {
+            type: 'menu-dropdown',
+            text: (props.user).split('@')[0],
+            description: props.user,
+            iconName: 'user-profile',
+            items: [ 
+              
+            ]
+          },
+          {
+            type: "button",
+            text: "Sign out",
+            onClick: props.signOut,
           },
         ]}
       />

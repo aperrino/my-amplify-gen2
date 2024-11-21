@@ -7,7 +7,6 @@ import {
   TextContent,
 } from "@cloudscape-design/components";
 import moment from 'moment';
-import { CommentForm } from './CommentForm';
 import { NewLineToBr } from './utils/NewLineToBr';
 
 export const NoComment = () => (
@@ -21,51 +20,27 @@ export const NoComment = () => (
   </Box>
 );
 
+interface CommentProps {
+  comment: {
+    id: string;
+    content: string;
+    owner: string;
+    updatedAt: string;
+    _version: number;
+  };
+  deleteCommentApi: (commentId: string, commentVersion: number) => Promise<void>;
+}
+
 export const Comment = ({
   comment,
-  activeComment,
-  setActiveComment,
-  editCommentApi,
   deleteCommentApi,
-}) => {
+}: CommentProps) => {
   const [confirmVisible, setConfirmVisible] = useState(false);
 
   const deleteHandler = async () => {
     await deleteCommentApi(comment.id, comment._version);
     setConfirmVisible(false);
   }
-
-  if (activeComment && activeComment.type === "edit" && activeComment.id === comment.id) {
-    return (
-      <CommentForm
-        initText={comment.content}
-        classId={comment.classId}
-        commentId={comment.id}
-        commentVersion={comment._version}
-        activeComment={activeComment}
-        setActiveComment={setActiveComment}
-        editCommentApi={editCommentApi}
-      />
-    );
-  }
-
-  const buttons = [
-    {
-      key: 'contact',
-      icon: 'contact',
-      onClick: () => {}
-    },
-    {
-      key: 'edit',
-      icon: 'edit',
-      onClick: () => setActiveComment({ id: comment.id, type: "edit" })
-    },
-    {
-      key: 'remove',
-      icon: 'remove',
-      onClick: () => setConfirmVisible(true)
-    }
-  ];
 
   return (
     <>
@@ -77,14 +52,11 @@ export const Comment = ({
       </TextContent>
 
       <SpaceBetween direction="horizontal" size="xxs">
-        {buttons.map(button => (
-          <Button
-            key={button.key}
-            iconName={button.icon}
-            variant="icon"
-            onClick={button.onClick}
-          />
-        ))}
+        <Button 
+          iconName="remove" 
+          variant="icon" 
+          onClick={() => setConfirmVisible(true)} 
+        />
       </SpaceBetween>
 
       <Modal
@@ -95,18 +67,10 @@ export const Comment = ({
         footer={
           <Box float="right">
             <SpaceBetween direction="horizontal" size="xs">
-              <Button 
-                key="cancel"
-                variant="link" 
-                onClick={() => setConfirmVisible(false)}
-              >
+              <Button variant="link" onClick={() => setConfirmVisible(false)}>
                 Cancel
               </Button>
-              <Button 
-                key="confirm"
-                variant="primary" 
-                onClick={deleteHandler}
-              >
+              <Button variant="primary" onClick={deleteHandler}>
                 Confirm
               </Button>
             </SpaceBetween>

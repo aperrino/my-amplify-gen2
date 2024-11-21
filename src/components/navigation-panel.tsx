@@ -30,7 +30,6 @@ export default function NavigationPanel() {
       //     { type: "link", text: "Item 2", href: "/section/item3" },
       //   ],
       // }
-      { type: "link", text: "test", href: "/" },
       { type: "link", text: "community", href: "/page2" },
       { type: "link", text: "profile", href: "/profile" },
       { type: "link", text: "admin", href: "/page4" },

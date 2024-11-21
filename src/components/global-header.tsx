@@ -22,8 +22,7 @@ export default function GlobalHeader(props) {
     >
       <TopNavigation
         identity={{
-          href: "/",
-          title: `🤖 ${APP_NAME}`,
+          title: `🤖 ${APP_NAME}`, // href 속성 제거
         }}
         utilities={[
           {

@@ -16,32 +16,23 @@ export default function NavigationPanel() {
 
   const [items] = useState<SideNavigationProps.Item[]>(() => {
     const items: SideNavigationProps.Item[] = [
-      // {
-      //   type: "link",
-      //   text: "Home",
-      //   href: "/",
-      // },
-      // {
-      //   type: "section",
-      //   text: "Section",
-      //   items: [
-      //     { type: "link", text: "Item 1", href: "/section/item1" },
-      //     { type: "link", text: "Item 2", href: "/section/item2" },
-      //     { type: "link", text: "Item 2", href: "/section/item3" },
-      //   ],
-      // }
-      { type: "link", text: "community", href: "/page2" },
-      { type: "link", text: "profile", href: "/profile" },
-      { type: "link", text: "admin", href: "/page4" },
-      { type: "link", text: "catalog", href: "/catalog" }
+      {
+        type: "section",
+        text: "Main Menu",
+        items: [
+          { type: "link", text: "🏠 Home", href: "/" },
+          { type: "link", text: "👤 Profile", href: "/profile" },
+          { type: "link", text: "📚 Catalog", href: "/catalog" }
+        ],
+      }
     ];
 
     items.push(
       { type: "divider" },
       {
         type: "link",
-        text: "Documentation",
-        href: "https://gitlab.aws.dev/aws-emea-prototyping/modern-application-development/user-experience-frontend/cloudscape",
+        text: "📖 Documentation",
+        href: "https://aws.amazon.com/bedrock",
         external: true,
       }
     );
@@ -75,7 +66,6 @@ export default function NavigationPanel() {
             navigationPanelState.collapsedSections?.[idx] === true;
           value.defaultExpanded = !collapsed;
         }
-
         return value;
       })}
     />

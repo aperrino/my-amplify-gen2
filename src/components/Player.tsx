@@ -7,7 +7,6 @@ import '../static/css/Videoplayer.css';
 
 import { generateClient } from 'aws-amplify/data';
 import { Schema } from '../../amplify/data/resource';
-import { Survey } from './Survey';
 
 const client = generateClient<Schema>();
 
@@ -108,11 +107,6 @@ export function Player({ url, user, classId, uid, title, author, desc }: PlayerP
       </Box>
       <SpaceBetween direction="vertical" size="s">
         <VideoInfo title={title} author={author} description={desc} />
-        <Survey 
-          classTitle={title} 
-          classId={classId} 
-          userId={user} 
-        />
       </SpaceBetween>
     </Container>
   );

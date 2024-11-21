@@ -5,7 +5,6 @@ import {
 import { useNavigationPanelState } from "../common/hooks/use-navigation-panel-state";
 import { useState } from "react";
 import { useOnFollow } from "../common/hooks/use-on-follow";
-import { APP_NAME } from "../common/constants";
 import { useLocation } from "react-router-dom";
 
 export default function NavigationPanel() {
@@ -16,15 +15,9 @@ export default function NavigationPanel() {
 
   const [items] = useState<SideNavigationProps.Item[]>(() => {
     const items: SideNavigationProps.Item[] = [
-      {
-        type: "section",
-        text: "Main Menu",
-        items: [
-          { type: "link", text: "🏠 Home", href: "/" },
-          { type: "link", text: "👤 Profile", href: "/profile" },
-          { type: "link", text: "📚 Catalog", href: "/catalog" }
-        ],
-      }
+      { type: "link", text: "🏠 Home", href: "/" },
+      { type: "link", text: "👤 Profile", href: "/profile" },
+      { type: "link", text: "📚 Catalog", href: "/catalog" }
     ];
 
     items.push(
@@ -58,16 +51,8 @@ export default function NavigationPanel() {
     <SideNavigation
       onFollow={onFollow}
       onChange={onChange}
-      header={{ href: "/", text: APP_NAME }}
       activeHref={location.pathname}
-      items={items.map((value, idx) => {
-        if (value.type === "section") {
-          const collapsed =
-            navigationPanelState.collapsedSections?.[idx] === true;
-          value.defaultExpanded = !collapsed;
-        }
-        return value;
-      })}
+      items={items}
     />
   );
 }

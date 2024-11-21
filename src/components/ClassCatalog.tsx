@@ -13,9 +13,10 @@ const ClassCatalog = ({
   activeCourse,
   setActiveClass,
 }) => {
-
   const [classes, setClasses] = useState<Array<Schema["Class"]["type"]>>([]);
   const [loading, setLoading] = useState(true);
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 4; 
 
   useEffect(() => {
     const fetchClasses = async () => {
@@ -25,10 +26,19 @@ const ClassCatalog = ({
       const classes_return = await fetchClass(activeCourse);
       setClasses(classes_return || []);
       setLoading(false);
+      setCurrentPage(1); 
     };
 
     fetchClasses();
   }, [activeCourse]);
+
+  const getCurrentPageItems = () => {
+    const sortedClasses = classes.sort((a, b) => a.class_flag - b.class_flag);
+    const startIndex = (currentPage - 1) * itemsPerPage;
+    return sortedClasses.slice(startIndex, startIndex + itemsPerPage);
+  };
+
+  const pagesCount = Math.ceil(classes.length / itemsPerPage);
 
   return (
     <Cards
@@ -64,7 +74,9 @@ const ClassCatalog = ({
             id: 'state',
             header: 'Status',
             content: item => (
-              <StatusIndicator type={item.class_flag > 0 ? 'error' : 'success'}>{item.class_flag > 0 ? "Unavailable" : "Available"}</StatusIndicator>
+              <StatusIndicator type={item.class_flag > 0 ? 'error' : 'success'}>
+                {item.class_flag > 0 ? "Unavailable" : "Available"}
+              </StatusIndicator>
             ),
           },
         ]
@@ -74,7 +86,8 @@ const ClassCatalog = ({
         { minWidth: 500, cards: 2 }
       ]}
       isItemDisabled={item => (item.class_flag > 0)}
-      items={classes.sort((a, b) => a.class_flag - b.class_flag)}
+      items={getCurrentPageItems()}
+      loading={loading}
       loadingText="Loading contents"
       empty={
         <Box
@@ -86,18 +99,25 @@ const ClassCatalog = ({
           <b>No Contents</b>
         </Box>
       }
-      header={activeCourse && activeCourse != null ? (<Header>{activeCourse.title}</Header>) : (<div />)}
-      
-      // TODO: Fix pagination
+      header={activeCourse && activeCourse != null ? (
+        <Header>{activeCourse.title}</Header>
+      ) : (
+        <div />
+      )}
       pagination={
-        <Pagination currentPageIndex={1} pagesCount={2} />
+        <Pagination 
+          currentPageIndex={currentPage}
+          pagesCount={pagesCount}
+          onNextClick={() => setCurrentPage(curr => Math.min(curr + 1, pagesCount))}
+          onPreviousClick={() => setCurrentPage(curr => Math.max(curr - 1, 1))}
+          onChange={({detail}) => setCurrentPage(detail.currentPageIndex)}
+        />
       }
     />
   );
 }
 
 const fetchClass = async (course) => {
-
   let courseId = null;
   if (course && course != null) {
     courseId = course.id;
@@ -113,10 +133,10 @@ const fetchClass = async (course) => {
     });
 
     return CoursesList;
-
   }
   catch (e) {
     console.log(e);
+    return [];
   }
 }
 

@@ -15,13 +15,31 @@ import BaseAppLayout from "../components/base-app-layout";
 
 const client = generateClient<Schema>();
 
-export default function ProfilePage(props) {
+export default function ProfilePage({ user, email, attributes }) {
   const [totalPoints, setTotalPoints] = useState<number>(0);
+  const [profileInfo, setProfileInfo] = useState<Schema["Profile"]["type"]>({ name: "", organization: "" });
 
-  // Rewards 컴포넌트로부터 포인트 합계를 받아오는 함수
   const handleTotalPointsUpdate = (points: number) => {
     setTotalPoints(points);
   };
+
+  const fetchProfileInfo = async () => {
+    try {
+      const { data: profile } = await client.models.Profile.get({ id: user });
+      if (profile) {
+        setProfileInfo({
+          organization: profile.organization || attributes?.['custom:organization'] || 'AWS',
+          email: email
+        });
+      }
+    } catch (error) {
+      console.error("Error fetching profile:", error);
+    }
+  };
+
+  useEffect(() => {
+    fetchProfileInfo();
+  }, [user]);
 
   return (
     <BaseAppLayout
@@ -32,14 +50,18 @@ export default function ProfilePage(props) {
               <Box padding="s">
                 <img 
                   src={peccy} 
-                  alt={`${props.user}'s avatar`} 
+                  alt={`${user}'s avatar`}
                   width="100px" 
                   id="avatar" 
                 />
                 <div style={{ marginTop: "1rem" }}>
                   <div style={{ marginBottom: "0.5rem" }}>
-                    <strong>User: </strong> 
-                    <span>{props.user}</span>
+                    <strong>Organization: </strong> 
+                    <span>{profileInfo.organization || "Not set"}</span>
+                  </div>
+                  <div style={{ marginBottom: "0.5rem" }}>
+                    <strong>Email: </strong> 
+                    <span>{email}</span>
                   </div>
                   <div>
                     <strong>Total Points: </strong> 
@@ -49,7 +71,7 @@ export default function ProfilePage(props) {
               </Box>
             </Grid>
           </Container>
-          <Rewards userId={props.user} onPointsUpdate={handleTotalPointsUpdate} />
+          <Rewards userId={user} onPointsUpdate={handleTotalPointsUpdate} />
         </SpaceBetween>
       }  
     />

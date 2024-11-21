@@ -1,4 +1,3 @@
-// ui
 import {
     Box, Header, SpaceBetween,
     Pagination, Table, Button,
@@ -10,13 +9,6 @@ import React, { useEffect, useState } from "react";
 import { generateClient } from 'aws-amplify/data';
 import { Schema } from '../../amplify/data/resource';
 
-// function to show total reward count
-export const getHeaderCounterText = (
-  items: ReadonlyArray<unknown>
-) => {
-  return `(${items.length})`;
-};
-
 const TableEmptyState = () => {
   return (
     <SpaceBetween size="l">
@@ -26,7 +18,7 @@ const TableEmptyState = () => {
         textAlign="center"
         color="inherit"
       >
-        No Contents
+        No Learning Activities
       </Box>
     </SpaceBetween>
   );
@@ -36,13 +28,27 @@ const client = generateClient<Schema>();
 
 function Rewards({ userId, onPointsUpdate }) {
   const [rewards, setRewards] = useState<Array<Schema["Reward"]["type"]>>([]);
+  const [classes, setClasses] = useState<Record<string, Schema["Class"]["type"]>>({});
   
   const { items, collectionProps, paginationProps } = useCollection(rewards, {
     filtering: {
-      empty: <TableEmptyState resourceName="Reward" />,
+      empty: <TableEmptyState resourceName="Learning Activities" />,
     },
     pagination: { pageSize: 5 },
   });
+
+  const fetchClasses = async () => {
+    try {
+      const { data: classItems } = await client.models.Class.list();
+      const classMap = classItems.reduce((acc, cls) => {
+        acc[cls.id] = cls;
+        return acc;
+      }, {});
+      setClasses(classMap);
+    } catch (error) {
+      console.error("Error fetching classes:", error);
+    }
+  };
 
   const fetchRewards = async () => {
     try {
@@ -59,12 +65,9 @@ function Rewards({ userId, onPointsUpdate }) {
     }
   };
 
-  function createRewards() {
-    client.models.Reward.create({ id: window.prompt("Add Profile content") });
-  }
-
   useEffect(() => {
     fetchRewards();
+    fetchClasses();
   }, []);
 
   return (
@@ -75,22 +78,25 @@ function Rewards({ userId, onPointsUpdate }) {
         lastIndex,
         totalItemsCount
       }) =>
-        `Displaying items ${firstIndex} to ${lastIndex} of ${totalItemsCount}`
+        `Displaying activities ${firstIndex} to ${lastIndex} of ${totalItemsCount}`
       }
       columnDefinitions={[
         {
-            id: 'event',
-            header: 'Event',
-            cell: item => item.id,
+            id: 'activity',
+            header: 'Learning Activity',
+            cell: item => {
+              const classInfo = classes[item.classId];
+              return classInfo ? classInfo.name : 'Unknown Activity';
+            }
         },
         {
             id: 'point',
-            header: 'Point',
+            header: 'Earned Points',
             cell: item => item.point,
         },
         {
             id: 'date',
-            header: 'Date',
+            header: 'Completion Date',
             cell: item => new Date(item.createdAt).toLocaleString('en', { timeZone: 'America/Los_Angeles' }),
         },
       ]}
@@ -104,12 +110,17 @@ function Rewards({ userId, onPointsUpdate }) {
           color="inherit"
         >
           <SpaceBetween size="m">
-            <b>No resources</b>
-            <Button onClick={createRewards}>Create resource</Button>
+            <b>No Learning Activities Yet</b>
           </SpaceBetween>
         </Box>
       }
-      header={<Header counter={getHeaderCounterText(rewards)}> Rewards </Header>}
+      header={
+        <Header 
+          description="Track your learning progress and earned points"
+        >
+          Learning History
+        </Header>
+      }
       pagination={<Pagination {...paginationProps} />}
     />
   );

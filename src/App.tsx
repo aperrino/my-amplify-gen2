@@ -71,6 +71,7 @@ function AuthenticatedApp({ signOut, user }) {
                 />
               } 
             />
+            <Route path="/absproxy/5173" element={<HomePage />} />
             <Route path="*" element={<NotFound />} />
             <Route path="/catalog" element={<Catalog />} />
           </Routes>

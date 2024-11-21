@@ -3,8 +3,7 @@ import {
     Box, Header, SpaceBetween,
     Pagination, Table, Button,
   } from "@cloudscape-design/components";
-  import { useCollection } from '@cloudscape-design/collection-hooks';
-
+import { useCollection } from '@cloudscape-design/collection-hooks';
 import React, { useEffect, useState } from "react";
 
 // API
@@ -35,30 +34,41 @@ const TableEmptyState = () => {
 
 const client = generateClient<Schema>();
 
-  function Rewards(user) {
-    const [rewards, setRewards] = useState<Array<Schema["Reward"]["type"]>>([]);
-    const { items, collectionProps, paginationProps } = useCollection(rewards, {
-      filtering: {
-        empty: <TableEmptyState resourceName="Reward" />,
-      },
-      pagination: { pageSize: 5 },
-    });
+function Rewards({ userId, onPointsUpdate }) {
+  const [rewards, setRewards] = useState<Array<Schema["Reward"]["type"]>>([]);
+  
+  const { items, collectionProps, paginationProps } = useCollection(rewards, {
+    filtering: {
+      empty: <TableEmptyState resourceName="Reward" />,
+    },
+    pagination: { pageSize: 5 },
+  });
 
-    const fetchRewards = async () => {
+  const fetchRewards = async () => {
+    try {
       const {data: points, errors } = await client.models.Reward.list();
       setRewards(points);
-    };
+      
+      // Calculate total points and send to parent component
+      const totalPoints = points.reduce((sum, reward) => sum + (reward.point || 0), 0);
+      onPointsUpdate(totalPoints);
+    } catch (error) {
+      console.error("Error fetching rewards:", error);
+      setRewards([]);
+      onPointsUpdate(0);
+    }
+  };
 
-    function createRewards() {
-      client.models.Reward.create({ id: window.prompt("Add Profile content") });
+  function createRewards() {
+    client.models.Reward.create({ id: window.prompt("Add Profile content") });
   }
 
-    useEffect(() => {
-      fetchRewards();
-    }, []);
-  
-    return (
-      <Table
+  useEffect(() => {
+    fetchRewards();
+  }, []);
+
+  return (
+    <Table
       {...collectionProps}
       renderAriaLive={({
         firstIndex,
@@ -86,7 +96,6 @@ const client = generateClient<Schema>();
       ]}
       enableKeyboardNavigation
       items={rewards}
-      // loadingText="Loading resources"
       sortingDisabled
       empty={
         <Box
@@ -103,89 +112,7 @@ const client = generateClient<Schema>();
       header={<Header counter={getHeaderCounterText(rewards)}> Rewards </Header>}
       pagination={<Pagination {...paginationProps} />}
     />
-    );
-  }
-  
-  export { Rewards };
+  );
+}
 
-// component
-// import { useAsyncData } from "./DataProvider";
-// import { DataProvider } from "./DataProvider";
-
-
-// export const REWARDS_COLUMN_DEFINITIONS = [
-//     {
-//         id: 'event',
-//         header: 'Event',
-//         cell: item => item.id,
-//     },
-//     {
-//         id: 'point',
-//         header: 'Point',
-//         cell: item => item.point,
-//     },
-//     {
-//         id: 'date',
-//         header: 'Date',
-//         cell: item => new Date(item.createdAt).toLocaleString('en', { timeZone: 'America/Los_Angeles' }),
-//     },
-// ];
-
-// export const getHeaderCounterText = (
-//     items: ReadonlyArray<unknown>
-//   ) => {
-//     return `(${items.length})`;
-//   };
-
-//   const TableEmptyState = () => {
-//     return (
-//       <SpaceBetween size="l">
-//         <Box
-//           margin={{ vertical: 'xs' }}
-//           fontSize="heading-s"
-//           textAlign="center"
-//           color="inherit"
-//         >
-//           No Contents
-//         </Box>
-//       </SpaceBetween>
-//     );
-//   }
-  
-
-//   function Rewards(user) {
-//     const [rewards, setRewards, loading] = useAsyncData(() => new DataProvider().fetchData(user.userId));
-
-//     // Check if rewards is an array before using it with useCollection
-//     const isRewardsArray = Array.isArray(rewards);
-
-//     const { items, collectionProps, paginationProps } = useCollection(isRewardsArray ? rewards : [], {
-//         filtering: {
-//           empty: <TableEmptyState resourceName="Reward" />,
-//         },
-//         pagination: { pageSize: 5 },
-//       });
-  
-//     return (
-//       <Table
-//         {...collectionProps}
-//         loading={loading}
-//         loadingText="Loading rewards"
-//         columnDefinitions={REWARDS_COLUMN_DEFINITIONS}
-//         items={items}
-//         header={
-//           <Header
-//             counter={getHeaderCounterText(rewards)}
-//           >
-//             Rewards
-//           </Header>
-//         }
-//         pagination={<Pagination {...paginationProps} />}
-//       />
-//     );
-//   }
-  
-//   export { Rewards };
-
-
-  
+export { Rewards };

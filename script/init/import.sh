@@ -47,7 +47,7 @@ sed -i -e "s/replace_time/$current_time/g" Comment.json
 #Insert the data into tables
 aws dynamodb batch-write-item --request-items file://Course.json
 aws dynamodb batch-write-item --request-items file://Class.json
-aws dynamodb batch-write-item --request-items file://Channel.json
+#aws dynamodb batch-write-item --request-items file://Channel.json
 
 # Insert the data into tables which are larger then 25 items
 input_file="Comment.json"

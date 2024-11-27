@@ -100,7 +100,7 @@ const ClassCatalog = ({
         </Box>
       }
       header={activeCourse && activeCourse != null ? (
-        <Header>{activeCourse.title}</Header>
+        <Header>{activeCourse.name}</Header>
       ) : (
         <div />
       )}

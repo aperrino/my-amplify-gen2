@@ -39,49 +39,51 @@ const createOrUpdateProfile = async (user) => {
   }
 };
 
-export default function App() {
+function AuthenticatedApp({ signOut, user }) {
   const Router = USE_BROWSER_ROUTER ? BrowserRouter : HashRouter;
 
+  useEffect(() => {
+    if (user) {
+      createOrUpdateProfile(user);
+    }
+  }, [user]);
+
+  return (
+    <div style={{ height: "100%" }}>
+      <Router>
+        <GlobalHeader 
+          user={user?.signInDetails?.loginId} 
+          signOut={signOut} 
+        />
+        <div style={{ height: "56px", backgroundColor: "#000716" }}>&nbsp;</div>
+        <div>
+          <Routes>
+            <Route index path="/" element={<HomePage />} />
+            <Route 
+              path="/profile" 
+              element={
+                <ProfilePage 
+                  user={user?.username}
+                  email={user?.signInDetails?.loginId}
+                  attributes={user?.attributes}
+                />
+              } 
+            />
+            <Route path="/absproxy/5173" element={<HomePage />} />
+            <Route path="/proxy/5173/absproxy/5173" element={<HomePage />} />
+            <Route path="*" element={<NotFound />} />
+            <Route path="/catalog" element={<Catalog />} />
+          </Routes>
+        </div>
+      </Router>
+    </div>
+  );
+}
+
+export default function App() {
   return (
     <Authenticator>
-      {({ signOut, user }) => {
-        useEffect(() => {
-          if (user) {
-            createOrUpdateProfile(user);
-          }
-        }, [user]);
-
-        return (
-          <div style={{ height: "100%" }}>
-            <Router>
-              <GlobalHeader 
-                user={user?.signInDetails?.loginId} 
-                signOut={signOut} 
-              />
-              <div style={{ height: "56px", backgroundColor: "#000716" }}>&nbsp;</div>
-              <div>
-                <Routes>
-                  <Route index path="/" element={<HomePage />} />
-                  <Route 
-                    path="/profile" 
-                    element={
-                      <ProfilePage 
-                        user={user?.username}
-                        email={user?.signInDetails?.loginId}
-                        attributes={user?.attributes}
-                      />
-                    } 
-                  />
-                  <Route path="/absproxy/5173" element={<HomePage />} />
-                  <Route path="/proxy/5173/absproxy/5173" element={<HomePage />} />
-                  <Route path="*" element={<NotFound />} />
-                  <Route path="/catalog" element={<Catalog />} />
-                </Routes>
-              </div>
-            </Router>
-          </div>
-        );
-      }}
+      {(props) => <AuthenticatedApp {...props} />}
     </Authenticator>
   );
 }

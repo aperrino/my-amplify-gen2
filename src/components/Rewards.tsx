@@ -3,7 +3,7 @@ import {
     Pagination, Table,
 } from "@cloudscape-design/components";
 import { useCollection } from '@cloudscape-design/collection-hooks';
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { generateClient } from 'aws-amplify/data';
 import { Schema } from '../../amplify/data/resource';
 
@@ -22,7 +22,7 @@ const TableEmptyState = () => (
 
 const client = generateClient<Schema>();
 
-function Rewards({ userId, onPointsUpdate }) {
+function Rewards({ onPointsUpdate }: {onPointsUpdate: any }) {
     const [rewards, setRewards] = useState<Array<Schema["Reward"]["type"]>>([]);
     const [classes, setClasses] = useState<Record<string, Schema["Class"]["type"]>>({});
 
@@ -39,8 +39,10 @@ function Rewards({ userId, onPointsUpdate }) {
     const fetchClasses = async () => {
         try {
             const { data: classItems } = await client.models.Class.list();
-            const classMap = classItems.reduce((acc, cls) => {
-                acc[cls.id] = cls;
+            const classMap = classItems.reduce<Record<string, any>>((acc, cls) => {
+                if (cls?.id) {
+                    acc[cls.id] = cls;
+                }
                 return acc;
             }, {});
             setClasses(classMap);
@@ -77,7 +79,7 @@ function Rewards({ userId, onPointsUpdate }) {
                 {
                     id: 'activity',
                     header: 'Learning Activity',
-                    cell: item => classes[item.classId]?.name ?? 'Unknown Activity'
+                    cell: item => classes[item?.classId ?? ""]?.name ?? 'Unknown Activity'
                 },
                 {
                     id: 'point',

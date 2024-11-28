@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import peccy from "../static/images/peccy.png";
 import "../static/css/ProfileCard.css";
 import {
@@ -15,9 +15,13 @@ import BaseAppLayout from "../components/base-app-layout";
 
 const client = generateClient<Schema>();
 
-export default function ProfilePage({ user, email, attributes }) {
+export default function ProfilePage({ user, email, attributes }: { user: any, email: string, attributes: any }) {
   const [totalPoints, setTotalPoints] = useState<number>(0);
-  const [profileInfo, setProfileInfo] = useState<Schema["Profile"]["type"]>({ name: "", organization: "" });
+  const [profileInfo, setProfileInfo] = useState<Schema["Profile"]["type"]>({ 
+    id: "X",
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
+  });
 
   const handleTotalPointsUpdate = (points: number) => {
     setTotalPoints(points);
@@ -27,10 +31,11 @@ export default function ProfilePage({ user, email, attributes }) {
     try {
       const { data: profile } = await client.models.Profile.get({ id: user });
       if (profile) {
-        setProfileInfo({
+        setProfileInfo(prev => ({
+          ...prev,
           organization: profile.organization || attributes?.['custom:organization'] || 'AWS',
           email: email
-        });
+        }));
       }
     } catch (error) {
       console.error("Error fetching profile:", error);
@@ -71,7 +76,7 @@ export default function ProfilePage({ user, email, attributes }) {
               </Box>
             </Grid>
           </Container>
-          <Rewards userId={user} onPointsUpdate={handleTotalPointsUpdate} />
+          <Rewards onPointsUpdate={handleTotalPointsUpdate} />
         </SpaceBetween>
       }  
     />

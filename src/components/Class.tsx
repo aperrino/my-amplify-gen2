@@ -9,10 +9,6 @@ import { Bot } from './Bot'
  
 const Class = ({
   activeClass,
-  name,
-  author,
-  description,
-  videoUrl,
   userName,
   userId,
 }) => {

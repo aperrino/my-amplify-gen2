@@ -11,6 +11,7 @@ const schema = a.schema({
       point: a.integer(),
       userId: a.string(),
       name: a.string(),
+      email: a.string(),
       organization: a.string(),
     })
     .authorization((allow) => [allow.owner()]),

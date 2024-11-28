@@ -1,10 +1,8 @@
 // ui
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import "../static/css/ProfileCard.css";
 import {
-  Box, Cards, Container,
-  Grid, Header, Link,
-  Pagination, SpaceBetween, StatusIndicator
+  Container, Grid, SpaceBetween
 } from "@cloudscape-design/components";
 
 // component
@@ -19,13 +17,13 @@ import BaseAppLayout from "../components/base-app-layout";
 
 const client = generateClient<Schema>();
 
-export default function Catalog(props) {
+export default function Catalog(props: any) {
   const [activeClass, setActiveClass] = useState<Schema["Class"]["type"]>();
   const [activeCourse, setActiveCourse] = useState<Schema["Course"]["type"]>();
   const [courses, setCourses] = useState<Array<Schema["Course"]["type"]>>([]);
   
   const fetchCourse = async () => {
-    const {data: items, errors } = await client.models.Course.list();
+    const {data: items } = await client.models.Course.list();
     setCourses(items);
     if (!activeCourse) {
       const course = items[0];
@@ -57,7 +55,7 @@ export default function Catalog(props) {
                 }
               </Container>
               {
-                (activeClass && activeClass != null && activeClass.class_flag <= 0) ? (
+                (activeClass && activeClass != null && activeClass.class_flag != null && activeClass.class_flag <= 0) ? (
                   <Class activeClass={activeClass} userName={props.user} userId={props.uid} />
                 ) : (
                   <ClassCatalog activeCourse={activeCourse} setActiveClass={setActiveClass} />

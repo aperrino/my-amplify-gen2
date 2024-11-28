@@ -12,10 +12,11 @@ import { Rewards } from "../components/Rewards.tsx";
 import { generateClient } from 'aws-amplify/data';
 import { Schema } from '../../amplify/data/resource';
 import BaseAppLayout from "../components/base-app-layout";
+import { ProfilePageProps } from '../components/utils/profile-manager';
 
 const client = generateClient<Schema>();
 
-export default function ProfilePage({ user, email, attributes }: { user: any, email: string, attributes: any }) {
+export default function ProfilePage({ user, email, attributes }: ProfilePageProps) {
   const [totalPoints, setTotalPoints] = useState<number>(0);
   const [profileInfo, setProfileInfo] = useState<Schema["Profile"]["type"]>({ 
     id: "X",

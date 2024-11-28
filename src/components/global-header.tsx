@@ -15,6 +15,31 @@ export default function GlobalHeader(props) {
     }
   };
 
+  const utilities = [
+    {
+      type: "button",
+      text: theme === Mode.Dark ? "Light Mode" : "Dark Mode",
+      onClick: onChangeThemeClick,
+    }
+  ];
+
+  if (props.isAuthenticated && props.signOut) {
+    utilities.push(
+      {
+        type: 'menu-dropdown',
+        text: (props.user).split('@')[0],
+        description: props.user,
+        iconName: 'user-profile',
+        items: []
+      },
+      {
+        type: "button",
+        text: "Sign out",
+        onClick: props.signOut,
+      }
+    );
+  }
+
   return (
     <div
       style={{ zIndex: 1002, top: 0, left: 0, right: 0, position: "fixed" }}
@@ -24,27 +49,7 @@ export default function GlobalHeader(props) {
         identity={{
           title: `🤖 ${APP_NAME}`,
         }}
-        utilities={[
-          {
-            type: "button",
-            text: theme === Mode.Dark ? "Light Mode" : "Dark Mode",
-            onClick: onChangeThemeClick,
-          },
-          {
-            type: 'menu-dropdown',
-            text: (props.user).split('@')[0],
-            description: props.user,
-            iconName: 'user-profile',
-            items: [ 
-              
-            ]
-          },
-          {
-            type: "button",
-            text: "Sign out",
-            onClick: props.signOut,
-          },
-        ]}
+        utilities={utilities}
       />
     </div>
   );

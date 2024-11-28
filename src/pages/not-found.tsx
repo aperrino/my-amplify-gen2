@@ -73,8 +73,8 @@ export default function NotFound() {
                     </Button>
                   }
                 >
-                  We're sorry, but the page you are looking for does not exist.
-                  You might have mistyped the address or the page may have moved.
+                  We're sorry, but you need to be signed in to access this page.
+                  Please sign in to continue.
                 </Alert>
               </Box>
             </Container>

@@ -1,5 +1,5 @@
 import { HashRouter, BrowserRouter, Routes, Route } from "react-router-dom";
-import React, { useEffect } from 'react';
+import { useEffect } from 'react';
 import { USE_BROWSER_ROUTER } from "./common/constants.ts";
 import GlobalHeader from "./components/global-header.tsx";
 import HomePage from "./pages/home.tsx";
@@ -10,36 +10,23 @@ import Catalog from "./pages/catalog.tsx";
 
 import { Authenticator } from "@aws-amplify/ui-react";
 import { Amplify } from 'aws-amplify';
-import { generateClient } from 'aws-amplify/data';
-import { Schema } from '../amplify/data/resource';
 import outputs from '../amplify_outputs.json';
 import '@aws-amplify/ui-react/styles.css'
+import { 
+  createOrUpdateProfile, 
+  defaultUser, 
+  type UserType,
+  getProfileProps 
+} from './components/utils/profile-manager';
 
 Amplify.configure(outputs);
-const client = generateClient<Schema>();
 
-const createOrUpdateProfile = async (user) => {
-  try {
-    const { data: existingProfile } = await client.models.Profile.get({ 
-      id: user.username 
-    });
+interface WorkshopAppProps {
+  signOut?: () => void;
+  user?: UserType;
+}
 
-    if (!existingProfile) {
-      await client.models.Profile.create({
-        id: user.username,
-        userId: user.username,
-        name: user.attributes?.name || user.signInDetails?.loginId,
-        organization: user.attributes?.['custom:organization'] || 'AWS',
-        point: 0
-      });
-      console.log('New profile created');
-    }
-  } catch (error) {
-    console.error('Error handling profile:', error);
-  }
-};
-
-function AuthenticatedApp({ signOut, user }) {
+const WorkshopApp = ({ signOut, user = defaultUser }: WorkshopAppProps) => {
   const Router = USE_BROWSER_ROUTER ? BrowserRouter : HashRouter;
 
   useEffect(() => {
@@ -53,37 +40,45 @@ function AuthenticatedApp({ signOut, user }) {
       <Router>
         <GlobalHeader 
           user={user?.signInDetails?.loginId} 
-          signOut={signOut} 
+          signOut={signOut}
+          isAuthenticated={!!signOut}
         />
         <div style={{ height: "56px", backgroundColor: "#000716" }}>&nbsp;</div>
         <div>
           <Routes>
-            <Route index path="/" element={<HomePage />} />
-            <Route 
-              path="/profile" 
-              element={
-                <ProfilePage 
-                  user={user?.username}
-                  email={user?.signInDetails?.loginId}
-                  attributes={user?.attributes}
-                />
-              } 
-            />
+            <Route path="/" element={<HomePage />} />
             <Route path="/absproxy/5173" element={<HomePage />} />
             <Route path="/proxy/5173/absproxy/5173" element={<HomePage />} />
+
+            <Route 
+              path="/catalog" 
+              element={signOut ? <Catalog /> : <NotFound />} 
+            />
+            <Route 
+              path="/profile" 
+              element={signOut ? <ProfilePage {...getProfileProps(user)} /> : <NotFound />} 
+            />
+
             <Route path="*" element={<NotFound />} />
-            <Route path="/catalog" element={<Catalog />} />
           </Routes>
         </div>
       </Router>
     </div>
   );
-}
+};
 
 export default function App() {
+  const signOut = undefined;
+  const user = defaultUser;
+
   return (
     <Authenticator>
-      {(props) => <AuthenticatedApp {...props} />}
+      {({ signOut, user }) => (
+        <WorkshopApp 
+          signOut={signOut}
+          user={user}
+        />
+      )}
     </Authenticator>
   );
 }

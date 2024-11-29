@@ -4,6 +4,8 @@ import { Mode } from "@cloudscape-design/global-styles";
 import { StorageHelper } from "../common/helpers/storage-helper";
 import { APP_NAME } from "../common/constants";
 
+import { TopNavigationProps } from "@cloudscape-design/components";
+
 export default function GlobalHeader(props: any) {
   const [theme, setTheme] = useState<Mode>(StorageHelper.getTheme());
 
@@ -15,9 +17,9 @@ export default function GlobalHeader(props: any) {
     }
   };
 
-  const utilities = [
+  const utilities: TopNavigationProps.Utility[] = [
     {
-      type: "button",
+      type: "button" as const,
       text: theme === Mode.Dark ? "Light Mode" : "Dark Mode",
       onClick: onChangeThemeClick,
     }
@@ -26,14 +28,14 @@ export default function GlobalHeader(props: any) {
   if (props.isAuthenticated && props.signOut) {
     utilities.push(
       {
-        type: 'menu-dropdown',
+        type: 'menu-dropdown' as const,
         text: (props.user).split('@')[0],
         description: props.user,
         iconName: 'user-profile',
         items: []
-      },
+      } as TopNavigationProps.MenuDropdownUtility,
       {
-        type: "button",
+        type: "button" as const,
         text: "Sign out",
         onClick: props.signOut,
       }

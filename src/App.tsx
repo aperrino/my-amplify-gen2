@@ -69,8 +69,9 @@ const WorkshopApp = ({ signOut, user = defaultUser }: WorkshopAppProps) => {
 };
 
 export default function App() {
-  const signOut = undefined;
-  const user = defaultUser;
+  // This parameter will be used in the workshop
+  // const signOut = undefined;
+  // const user = defaultUser;
 
   return (
     <Authenticator>

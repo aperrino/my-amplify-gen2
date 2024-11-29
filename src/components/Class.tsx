@@ -11,6 +11,10 @@ const Class = ({
   activeClass,
   userName,
   userId,
+}: {
+  activeClass: any;
+  userName: string;
+  userId: string;
 }) => {
   return (
     <>

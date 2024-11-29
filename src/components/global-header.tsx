@@ -4,7 +4,7 @@ import { Mode } from "@cloudscape-design/global-styles";
 import { StorageHelper } from "../common/helpers/storage-helper";
 import { APP_NAME } from "../common/constants";
 
-export default function GlobalHeader(props) {
+export default function GlobalHeader(props: any) {
   const [theme, setTheme] = useState<Mode>(StorageHelper.getTheme());
 
   const onChangeThemeClick = () => {
@@ -47,6 +47,7 @@ export default function GlobalHeader(props) {
     >
       <TopNavigation
         identity={{
+          href: '#',
           title: `🤖 ${APP_NAME}`,
         }}
         utilities={utilities}

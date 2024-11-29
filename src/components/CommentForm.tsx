@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import {
   Box,
   Button,
@@ -26,13 +26,22 @@ export const CommentForm = ({
   setActiveComment,
   createCommentApi,
   editCommentApi,
+}: {
+  initText: string,
+  classId: any,
+  commentId: string,
+  commentVersion: number,
+  activeComment: any,
+  setActiveComment: any,
+  createCommentApi: any,
+  editCommentApi: any
 }) => {
   const [post, setPost] = useState(initText);
   const [alertVisible, setAlertVisible] = useState(false);
   const [summary, setSummary] = useState('');
   const [isGenerating, setIsGenerating] = useState(false);
 
-  const submitHandler = async (event) => {
+  const submitHandler = async (event: any) => {
     event.preventDefault();
     if (post.replace(/\s/g, '').length > 0) {
       if (activeComment && activeComment.type === "edit") {
@@ -58,7 +67,7 @@ export const CommentForm = ({
     return content || null;
   };
 
-  const generateSummarization = async (e: any) => {
+  const generateSummarization = async () => {
     setIsGenerating(true);
     console.log("Generating summarization...");
     
@@ -73,9 +82,9 @@ export const CommentForm = ({
       }
 
       let allComments = [...commentItems];
-      if (post.trim()) {
-        allComments = [...allComments, { content: post }];
-      }
+      // if (post.trim()) {
+      //   allComments = [...allComments, { content: post }];
+      // }
 
       if (!allComments || allComments.length === 0) {
         console.log("No comments to summarize");
@@ -144,17 +153,17 @@ export const CommentForm = ({
 
           <Box>
             <Box
-              as="pre"
+              variant="pre"
               padding="s"
               fontSize="body-m"
               color="text-body-secondary"
-              backgroundColor="background-container"
-              borderRadius="s"
-              style={{
-                whiteSpace: 'pre-wrap',
-                wordWrap: 'break-word',
-                overflowWrap: 'break-word'
-              }}
+              // backgroundColor="background-container"
+              // borderRadius="s"
+              // style={{
+              //   whiteSpace: 'pre-wrap',
+              //   wordWrap: 'break-word',
+              //   overflowWrap: 'break-word'
+              // }}
             >
               <NewLineToBr>{summary || "Generated summary will appear here."}</NewLineToBr>
             </Box>

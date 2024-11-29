@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useCallback } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import {
   Box,
   Container,
@@ -40,7 +40,7 @@ export function Comments({ classId }: CommentsProps) {
 
   const fetchComments = useCallback(async () => {
     const { data: items, errors } = await client.models.Comment.list({
-      filter: { classId: { eq: classId } }
+      filter: { classId: { eq: classId } }, limit: 100
     });
     if (errors) {
       console.error('Error fetching comments:', errors);
@@ -101,14 +101,17 @@ export function Comments({ classId }: CommentsProps) {
 
   return (
     <Container header={<Header variant='h3'>Comments</Header>}>
-      <Box float='center'>
+      <Box>
         <SpaceBetween size="xl">
           <CommentForm 
-            classId={classId} 
+            classId={classId}
             createCommentApi={createCommentApi}
-            editCommentApi={editCommentApi}  
-            activeComment={activeComment} 
-            setActiveComment={setActiveComment}
+            editCommentApi={editCommentApi}
+            activeComment={activeComment}
+            setActiveComment={setActiveComment} 
+            initText={''} 
+            commentId={''} 
+            commentVersion={1}          
           />
           <SpaceBetween size="xs">
             {comments.length > 0 ? (
@@ -119,9 +122,9 @@ export function Comments({ classId }: CommentsProps) {
                   <Comment
                     key={comment.id}
                     comment={comment}
-                    activeComment={activeComment}
-                    setActiveComment={setActiveComment}
-                    editCommentApi={editCommentApi}
+                    // activeComment={activeComment}
+                    // setActiveComment={setActiveComment}
+                    // editCommentApi={editCommentApi}
                     deleteCommentApi={deleteCommentApi}
                   />
                 ))

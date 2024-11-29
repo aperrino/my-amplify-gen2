@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import {
   Cards, Link, StatusIndicator, Box, Pagination, Header
 } from "@cloudscape-design/components";
@@ -12,6 +12,9 @@ const client = generateClient<Schema>();
 const ClassCatalog = ({
   activeCourse,
   setActiveClass,
+}: { 
+  activeCourse: any, 
+  setActiveClass: any 
 }) => {
   const [classes, setClasses] = useState<Array<Schema["Class"]["type"]>>([]);
   const [loading, setLoading] = useState(true);
@@ -33,7 +36,7 @@ const ClassCatalog = ({
   }, [activeCourse]);
 
   const getCurrentPageItems = () => {
-    const sortedClasses = classes.sort((a, b) => a.class_flag - b.class_flag);
+    const sortedClasses = classes.sort((a, b) => (a.class_flag ?? 0) - (b.class_flag ?? 0));
     const startIndex = (currentPage - 1) * itemsPerPage;
     return sortedClasses.slice(startIndex, startIndex + itemsPerPage);
   };
@@ -43,14 +46,14 @@ const ClassCatalog = ({
   return (
     <Cards
       ariaLabels={{
-        itemSelectionLabel: (e, n) => `select ${n.name}`,
+        itemSelectionLabel: (_, n) => `select ${n.name}`,
         selectionGroupLabel: "Item selection"
       }}
       cardDefinition={{
         header: item => (
           <Link
             fontSize="heading-m"
-            href={item.id}
+            href={item.id || '#'}
             onFollow={(e) => {
                 e.preventDefault();
                 setActiveClass(classes.find(element => element.id === e.detail.href));
@@ -63,7 +66,7 @@ const ClassCatalog = ({
         sections: [
           {
             id: "image",
-            content: item => (<img src={item.image} alt={item.name} width='100%' />)
+            content: item => (<img src={item.image || '#'} alt={item.name} width='100%' />)
           },
           {
             id: "description",
@@ -74,8 +77,8 @@ const ClassCatalog = ({
             id: 'state',
             header: 'Status',
             content: item => (
-              <StatusIndicator type={item.class_flag > 0 ? 'error' : 'success'}>
-                {item.class_flag > 0 ? "Unavailable" : "Available"}
+              <StatusIndicator type={(item.class_flag ?? 0) > 0 ? 'error' : 'success'}>
+                {(item.class_flag ?? 0) > 0 ? "Unavailable" : "Available"}
               </StatusIndicator>
             ),
           },
@@ -85,7 +88,7 @@ const ClassCatalog = ({
         { cards: 1 },
         { minWidth: 500, cards: 2 }
       ]}
-      isItemDisabled={item => (item.class_flag > 0)}
+      isItemDisabled={item => ((item.class_flag ?? 0) > 0)}
       items={getCurrentPageItems()}
       loading={loading}
       loadingText="Loading contents"
@@ -108,8 +111,8 @@ const ClassCatalog = ({
         <Pagination 
           currentPageIndex={currentPage}
           pagesCount={pagesCount}
-          onNextClick={() => setCurrentPage(curr => Math.min(curr + 1, pagesCount))}
-          onPreviousClick={() => setCurrentPage(curr => Math.max(curr - 1, 1))}
+          // onNextClick={() => setCurrentPage(curr => Math.min(curr + 1, pagesCount))}
+          // onPreviousClick={() => setCurrentPage(curr => Math.max(curr - 1, 1))}
           onChange={({detail}) => setCurrentPage(detail.currentPageIndex)}
         />
       }
@@ -117,14 +120,14 @@ const ClassCatalog = ({
   );
 }
 
-const fetchClass = async (course) => {
+const fetchClass = async (course: any) => {
   let courseId = null;
   if (course && course != null) {
     courseId = course.id;
   }
 
   try {
-    const { data: CoursesList, errors } = await client.models.Class.list({
+    const { data: CoursesList } = await client.models.Class.list({
       filter: {
         courseId: {
           eq: courseId

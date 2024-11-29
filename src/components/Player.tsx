@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from "react";
+import { useState, useCallback } from "react";
 import ReactPlayer from 'react-player/lazy';
 import {
   Box, Container, SpaceBetween,
@@ -24,13 +24,13 @@ interface VideoProgress {
   playedSeconds: number;
 }
 
-export function Player({ url, user, classId, uid, title, author, desc }: PlayerProps) {
+export function Player({ url, user, classId, title, author, desc }: PlayerProps) {
   const [played, setPlayed] = useState(0);
   const [marker, setMarker] = useState(0);
   const [duration, setDuration] = useState(0);
   const INTERVAL = 30;
 
-  const updateReward = useCallback(async (complete = false) => {
+  const updateReward = useCallback(async () => {
     try {
       const { data: existingRewards } = await client.models.Reward.list({
         filter: { userId: { eq: user }, classId: { eq: classId } }
@@ -40,8 +40,8 @@ export function Player({ url, user, classId, uid, title, author, desc }: PlayerP
         const existingReward = existingRewards[0];
         await client.models.Reward.update({
           id: existingReward.id,
-          point: existingReward.point + 10,
-          _version: existingReward._version
+          point: existingReward.point || 0 + 10,
+          // _version: existingReward._version
         });
       } else {
         await client.models.Reward.create({
@@ -63,7 +63,7 @@ export function Player({ url, user, classId, uid, title, author, desc }: PlayerP
 
   const handleEnded = () => {
     if (Math.round(played) >= Math.floor(duration)) {
-      updateReward(true);
+      updateReward();
     }
   };
 

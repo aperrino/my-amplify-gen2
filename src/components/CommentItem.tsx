@@ -23,12 +23,11 @@ export const NoComment = () => (
 interface CommentProps {
   comment: {
     id: string;
-    content: string;
-    owner: string;
+    content: string | null;
+    owner?: string;
     updatedAt: string;
-    _version: number;
   };
-  deleteCommentApi: (commentId: string, commentVersion: number) => Promise<void>;
+  deleteCommentApi: (commentId: string) => Promise<void>;
 }
 
 export const Comment = ({
@@ -38,25 +37,38 @@ export const Comment = ({
   const [confirmVisible, setConfirmVisible] = useState(false);
 
   const deleteHandler = async () => {
-    await deleteCommentApi(comment.id, comment._version);
-    setConfirmVisible(false);
-  }
+    try {
+      console.log('Deleting comment:', comment.id);
+      await deleteCommentApi(comment.id);
+      setConfirmVisible(false);
+    } catch (error) {
+      console.error('Error deleting comment:', error);
+    }
+  };
 
   return (
-    <>
-      <TextContent>
-        <h4>{comment.owner}</h4>
-        <p>
-          <small>{moment(comment.updatedAt).fromNow()}</small>
-        </p>
-      </TextContent>
-
-      <SpaceBetween direction="horizontal" size="xxs">
-        <Button 
-          iconName="remove" 
-          variant="icon" 
-          onClick={() => setConfirmVisible(true)} 
-        />
+    <Box
+      padding="s"
+    >
+      <SpaceBetween direction="vertical" size="xs">
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+          <TextContent>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+              <Box variant="small" color="text-body-secondary">
+                {moment(comment.updatedAt).fromNow()}
+              </Box>
+              <Button 
+                iconName="remove" 
+                variant="icon" 
+                onClick={() => setConfirmVisible(true)}
+              />
+            </div>
+          </TextContent>
+        </div>
+        
+        <Box>
+          <NewLineToBr>{comment.content || ''}</NewLineToBr>
+        </Box>
       </SpaceBetween>
 
       <Modal
@@ -64,14 +76,22 @@ export const Comment = ({
         visible={confirmVisible}
         closeAriaLabel="Close modal"
         size="small"
+        header="Delete Confirmation"
         footer={
           <Box float="right">
             <SpaceBetween direction="horizontal" size="xs">
-              <Button variant="link" onClick={() => setConfirmVisible(false)}>
+              <Button 
+                variant="link" 
+                onClick={() => setConfirmVisible(false)}
+              >
                 Cancel
               </Button>
-              <Button variant="primary" onClick={deleteHandler}>
-                Confirm
+              <Button 
+                variant="primary" 
+                onClick={deleteHandler}
+                loading={false}
+              >
+                Delete
               </Button>
             </SpaceBetween>
           </Box>
@@ -79,7 +99,6 @@ export const Comment = ({
       >
         Are you sure to delete the message?
       </Modal>
-      <NewLineToBr>{comment.content}</NewLineToBr>
-    </>
+    </Box>
   );
 };

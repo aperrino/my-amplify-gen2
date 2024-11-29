@@ -34,6 +34,19 @@ export const defaultUser: UserType = {
   }
 };
 
+export const convertAuthToUserType = (authUser: any): UserType => {
+  return {
+    username: authUser?.username || 'guest',
+    signInDetails: {
+      loginId: authUser?.signInDetails?.loginId || 'guest@example.com'
+    },
+    attributes: {
+      name: authUser?.attributes?.name || '',
+      'custom:organization': authUser?.attributes?.['custom:organization'] || ''
+    }
+  };
+};
+
 export const getProfileProps = (user: UserType): ProfilePageProps => {
   return {
     user: user?.username || 'guest',

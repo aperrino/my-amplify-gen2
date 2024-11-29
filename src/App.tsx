@@ -12,11 +12,12 @@ import { Authenticator } from "@aws-amplify/ui-react";
 import { Amplify } from 'aws-amplify';
 import outputs from '../amplify_outputs.json';
 import '@aws-amplify/ui-react/styles.css'
-import { 
-  createOrUpdateProfile, 
-  defaultUser, 
+import {
+  createOrUpdateProfile,
+  defaultUser,
   type UserType,
-  getProfileProps 
+  getProfileProps,
+  convertAuthToUserType
 } from './components/utils/profile-manager';
 
 Amplify.configure(outputs);
@@ -38,8 +39,8 @@ const WorkshopApp = ({ signOut, user = defaultUser }: WorkshopAppProps) => {
   return (
     <div style={{ height: "100%" }}>
       <Router>
-        <GlobalHeader 
-          user={user?.signInDetails?.loginId} 
+        <GlobalHeader
+          user={user?.signInDetails?.loginId}
           signOut={signOut}
           isAuthenticated={!!signOut}
         />
@@ -50,13 +51,13 @@ const WorkshopApp = ({ signOut, user = defaultUser }: WorkshopAppProps) => {
             <Route path="/absproxy/5173" element={<HomePage />} />
             <Route path="/proxy/5173/absproxy/5173" element={<HomePage />} />
 
-            <Route 
-              path="/catalog" 
-              element={signOut ? <Catalog /> : <NotFound />} 
+            <Route
+              path="/catalog"
+              element={signOut ? <Catalog /> : <NotFound />}
             />
-            <Route 
-              path="/profile" 
-              element={signOut ? <ProfilePage {...getProfileProps(user)} /> : <NotFound />} 
+            <Route
+              path="/profile"
+              element={signOut ? <ProfilePage {...getProfileProps(user)} /> : <NotFound />}
             />
 
             <Route path="*" element={<NotFound />} />
@@ -74,9 +75,9 @@ export default function App() {
   return (
     <Authenticator>
       {({ signOut, user }) => (
-        <WorkshopApp 
+        <WorkshopApp
           signOut={signOut}
-          user={user}
+          user={user ? convertAuthToUserType(user) : defaultUser}
         />
       )}
     </Authenticator>

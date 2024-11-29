@@ -16,27 +16,16 @@ import { NewLineToBr } from './utils/NewLineToBr';
 
 const client = generateClient<Schema>();
 
+interface CommentFormProps {
+  classId: string;
+  createCommentApi: (post: string, classId: string) => Promise<void>;
+}
 
 export const CommentForm = ({
-  initText = '',
   classId,
-  commentId,
-  commentVersion,
-  activeComment,
-  setActiveComment,
   createCommentApi,
-  editCommentApi,
-}: {
-  initText: string,
-  classId: any,
-  commentId: string,
-  commentVersion: number,
-  activeComment: any,
-  setActiveComment: any,
-  createCommentApi: any,
-  editCommentApi: any
-}) => {
-  const [post, setPost] = useState(initText);
+}: CommentFormProps) => {
+  const [post, setPost] = useState('');
   const [alertVisible, setAlertVisible] = useState(false);
   const [summary, setSummary] = useState('');
   const [isGenerating, setIsGenerating] = useState(false);
@@ -44,20 +33,15 @@ export const CommentForm = ({
   const submitHandler = async (event: any) => {
     event.preventDefault();
     if (post.replace(/\s/g, '').length > 0) {
-      if (activeComment && activeComment.type === "edit") {
-        await editCommentApi(commentId, commentVersion, post);
-        setActiveComment(null);
-      } else {
-        await createCommentApi(post, classId);
-        setPost("");
-      }
+      await createCommentApi(post, classId);
+      setPost("");
     } else {
       setAlertVisible(true);
     }
   };
 
   const cancelHandler = () => {
-    activeComment && activeComment.type === "edit" ? setActiveComment(null) : setPost("");
+    setPost("");
   }
 
   const askBedrock = async (prompt: string) => {
@@ -72,8 +56,9 @@ export const CommentForm = ({
     console.log("Generating summarization...");
     
     try {
-      const { data: commentItems, errors } = await client.models.Comment.list({
-        filter: { classId: { eq: classId } }
+      const { data: comments, errors } = await client.models.Comment.list({
+        filter: { classId: { eq: classId } },
+        limit: 1000
       });
 
       if (errors) {
@@ -81,20 +66,21 @@ export const CommentForm = ({
         return;
       }
 
-      let allComments = [...commentItems];
-      // if (post.trim()) {
-      //   allComments = [...allComments, { content: post }];
-      // }
-
-      if (!allComments || allComments.length === 0) {
+      if (!comments || comments.length === 0) {
         console.log("No comments to summarize");
         setSummary("No comments available to summarize.");
         return;
       }
 
-      const commentsText = allComments
+      console.log(`Total comments found: ${comments.length}`);
+      console.log('All comments:', comments);
+
+      const commentsText = comments
         .map(comment => comment.content)
         .join("\n");
+
+      console.log('Full comments text being sent to Bedrock:', commentsText);
+      console.log('Number of characters in prompt:', commentsText.length);
 
       const prompt = `📊 Summarize the following comments in a structured format:
 
@@ -126,7 +112,6 @@ export const CommentForm = ({
     <form onSubmit={submitHandler}>
       <Form>
         <SpaceBetween size="m">
-          {/* Summarize Section */}
           <Box>
             <Button 
               formAction="none" 
@@ -157,21 +142,20 @@ export const CommentForm = ({
               padding="s"
               fontSize="body-m"
               color="text-body-secondary"
-              // backgroundColor="background-container"
-              // borderRadius="s"
-              // style={{
-              //   whiteSpace: 'pre-wrap',
-              //   wordWrap: 'break-word',
-              //   overflowWrap: 'break-word'
-              // }}
             >
-              <NewLineToBr>{summary || "Generated summary will appear here."}</NewLineToBr>
+              <div
+                style={{
+                  whiteSpace: 'pre-wrap',
+                  wordWrap: 'break-word',
+                }}
+              >
+                <NewLineToBr>{summary || "Generated summary will appear here."}</NewLineToBr>
+              </div>
             </Box>
           </Box>
 
           <hr style={{ width: '100%', margin: '20px 0' }} />
 
-          {/* Comment Section */}
           <Grid disableGutters gridDefinition={[{ colspan: 10 }, { colspan: 2 }]}>
             <Textarea
               placeholder="Enter your comments here."

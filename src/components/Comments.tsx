@@ -14,17 +14,11 @@ const client = generateClient<Schema>();
 
 export interface Comment {
   id: string;
-  classId: string;
-  content: string;
-  owner: string;
+  classId: string | null;
+  content: string | null;
+  owner?: string;
   createdAt: string;
   updatedAt: string;
-  _version: number;
-}
-
-export interface ActiveComment {
-  id: string;
-  type: 'edit' | 'reply';
 }
 
 interface CommentsProps {
@@ -32,26 +26,42 @@ interface CommentsProps {
 }
 
 export function Comments({ classId }: CommentsProps) {
-  const [comments, setComments] = useState<any[]>([]);
-  const [activeComment, setActiveComment] = useState<{
-    id: string;
-    type: string;
-  } | null>(null);
+  const [comments, setComments] = useState<Comment[]>([]);
 
   const fetchComments = useCallback(async () => {
     const { data: items, errors } = await client.models.Comment.list({
-      filter: { classId: { eq: classId } }, limit: 100
+      filter: { classId: { eq: classId } }, 
+      limit: 1000
     });
     if (errors) {
       console.error('Error fetching comments:', errors);
     } else {
-      setComments(items);
+      setComments(items as Comment[]);
     }
   }, [classId]);
 
   useEffect(() => {
     fetchComments();
-  }, [fetchComments]);
+
+    const sub = client.models.Comment.observeQuery({
+      filter: { classId: { eq: classId } }
+    }).subscribe({
+      next: ({ items }) => {
+        console.log('Received new comments:', items);
+        setComments(() => {
+          const newComments = [...items] as Comment[];
+          return newComments.sort((a, b) => 
+            new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+          );
+        });
+      },
+      error: (error) => {
+        console.error('Subscription error:', error);
+      }
+    });
+
+    return () => sub.unsubscribe();
+  }, [classId]);
 
   const createCommentApi = useCallback(async (post: string, classId: string) => {
     const { errors, data: newComment } = await client.models.Comment.create({
@@ -59,45 +69,28 @@ export function Comments({ classId }: CommentsProps) {
       content: post,
     });
     if (!errors && newComment) {
-      setComments(prevComments => [...prevComments, newComment]);
+      console.log('New comment created:', newComment);
     }
   }, []);
 
-  const editCommentApi = useCallback(async (
-    commentId: string, 
-    commentVersion: number, 
-    post: string
-  ) => {
-    const updatedPost = {
-      id: commentId,
-      content: post,
-      _version: commentVersion,
-    };
-    const { data: updatedComment, errors } = await client.models.Comment.update(updatedPost);
-    if (errors) {
-      console.error('Error updating comment:', errors);
-    } else {
-      console.log('Updated comment:', updatedComment);
-      await fetchComments();
+  const deleteCommentApi = useCallback(async (commentId: string) => {
+    try {
+      const { data: deletedComment, errors } = await client.models.Comment.delete({
+        id: commentId
+      });
+      
+      if (errors) {
+        console.error('Error deleting comment:', errors);
+      } else {
+        console.log('Deleted comment:', deletedComment);
+        setComments(prevComments => 
+          prevComments.filter(comment => comment.id !== commentId)
+        );
+      }
+    } catch (error) {
+      console.error('Error in deleteCommentApi:', error);
     }
-  }, [fetchComments]);
-
-  const deleteCommentApi = useCallback(async (
-    commentId: string, 
-    commentVersion: number
-  ) => {
-    const toBeDeletedComment = {
-      id: commentId,
-      _version: commentVersion,
-    };
-    const { data: deletedComment, errors } = await client.models.Comment.delete(toBeDeletedComment);
-    if (errors) {
-      console.error('Error deleting comment:', errors);
-    } else {
-      console.log('Deleted comment:', deletedComment);
-      await fetchComments();
-    }
-  }, [fetchComments]);
+  }, []);
 
   return (
     <Container header={<Header variant='h3'>Comments</Header>}>
@@ -106,25 +99,15 @@ export function Comments({ classId }: CommentsProps) {
           <CommentForm 
             classId={classId}
             createCommentApi={createCommentApi}
-            editCommentApi={editCommentApi}
-            activeComment={activeComment}
-            setActiveComment={setActiveComment} 
-            initText={''} 
-            commentId={''} 
-            commentVersion={1}          
           />
           <SpaceBetween size="xs">
             {comments.length > 0 ? (
               comments
                 .filter(comment => comment.classId === classId)
-                .sort((a, b) => b.createdAt.localeCompare(a.updatedAt))
                 .map(comment => (
                   <Comment
                     key={comment.id}
                     comment={comment}
-                    // activeComment={activeComment}
-                    // setActiveComment={setActiveComment}
-                    // editCommentApi={editCommentApi}
                     deleteCommentApi={deleteCommentApi}
                   />
                 ))

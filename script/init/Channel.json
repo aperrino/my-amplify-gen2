@@ -1,5 +1,5 @@
 {
-    "Channel-qltmvvusg5a35cuzjxtki7wk2y-NONE": [
+    "Channel": [
         {"PutRequest": 
             {"Item":{"id":{"S":"8979563f-54f6-4013-8409-ae3a821630d9"},"icon":{"S":"icon"},"name":{"S":"welcome"},"createdAt":{"S":"2024-11-30T05:53:30Z"}, "updatedAt":{"S":"2024-11-30T05:53:30Z"}}}
         }
